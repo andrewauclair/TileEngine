@@ -19,6 +19,8 @@ public class CChunk : MonoBehaviour
 	private List<int> m_aData = null;
 
 	private bool m_fMeshGenerated = false;
+
+	private int m_nPixelSize = 32;
     #endregion
 
     #region Unity Methods
@@ -64,8 +66,8 @@ public class CChunk : MonoBehaviour
 
 		Debug.Log(t_strVerts);
 
-		int t_xSize = CWorldManager.Instance.ChunkSize;
-		int t_ySize = CWorldManager.Instance.ChunkSize;
+		int t_xSize = CWorldManager.Instance.ChunkWidth;
+		int t_ySize = CWorldManager.Instance.ChunkHeight;
 		int t_nTileSize = CWorldManager.Instance.TileSize;
 
 		int t_cTiles = t_xSize * t_ySize;
@@ -81,19 +83,11 @@ public class CChunk : MonoBehaviour
 
 		int t_i = 0;
 
-		for (float t_y = -(t_ySize / 2.0f); t_y <= t_ySize / 2.0f; ++t_y)
-		{
-			for (float t_x = -(t_xSize / 2.0f); t_x <= t_xSize / 2.0f; ++t_x)
-			{
-				//t_aVertices[t_i] = new Vector3(t_x *t_nTileSize, t_y * t_nTileSize, 0);
-
-				//t_aUVs[t_i++] = new Vector2((t_x + (t_xSize / 2.0f)) / (float)t_xSize, (t_y + (t_ySize / 2.0f)) / (float)t_ySize);
-			}
-		}
-
 		int t_iVert = 0;
 		int t_iTri = 0;
 		int t_iUV = 0;
+		int t_nTextureWidth = CWorldManager.Instance.AtlasMat.mainTexture.width;
+		int t_nTextureHeight = CWorldManager.Instance.AtlasMat.mainTexture.height;
 
 		for (int t_y = 0; t_y < t_ySize; ++t_y)
 		{
@@ -107,21 +101,24 @@ public class CChunk : MonoBehaviour
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0);
 
+				int t_it = (t_y + t_x) % 3;
+				float t_rT = t_it * .125f;
+
 				switch (m_aData[(t_y * t_xSize) + t_x])
 				{
 					case 0:
 						{
-							t_aUVs[t_iUV++] = new Vector2(0, 0);
-							t_aUVs[t_iUV++] = new Vector2(0, .5f);
-							t_aUVs[t_iUV++] = new Vector2(1, 0);
-							t_aUVs[t_iUV++] = new Vector2(1, .5f);
+							t_aUVs[t_iUV++] = new Vector2(t_rT + .125f, .75f); 
+							t_aUVs[t_iUV++] = new Vector2(t_rT + .125f, 1); 
+							t_aUVs[t_iUV++] = new Vector2(t_rT, .75f); 
+							t_aUVs[t_iUV++] = new Vector2(t_rT, 1);
 						}break;
 					case 1:
 						{
-							t_aUVs[t_iUV++] = new Vector2(0, .5f);
-							t_aUVs[t_iUV++] = new Vector2(0, 1);
-							t_aUVs[t_iUV++] = new Vector2(1, .5f);
-							t_aUVs[t_iUV++] = new Vector2(1, 1);
+							t_aUVs[t_iUV++] = new Vector2(0, 0);
+							t_aUVs[t_iUV++] = new Vector2(0, m_nPixelSize / (float)t_nTextureHeight);
+							t_aUVs[t_iUV++] = new Vector2(m_nPixelSize / (float)t_nTextureWidth, 0);
+							t_aUVs[t_iUV++] = new Vector2(m_nPixelSize / (float)t_nTextureWidth, m_nPixelSize / (float)t_nTextureHeight);
 						}break;
 				}
 				

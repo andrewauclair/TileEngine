@@ -10,7 +10,8 @@ public class CWorldManager : MonoBehaviour
 
     #region Public Data
 	[Tooltip("Chunk size to load in a single mesh, screen size or greater recommended")]
-	public int ChunkSize = 0;
+	public int ChunkWidth = 0;
+	public int ChunkHeight = 0;
 	public int TileSize = 0;
 	public Material AtlasMat = null;
     #endregion
@@ -24,7 +25,7 @@ public class CWorldManager : MonoBehaviour
     {
 		Instance = this;
 
-		if (ChunkSize <= 0)
+		if (ChunkWidth <= 0 || ChunkHeight <= 0)
 		{
 			Debug.LogError("Chunk size is <= 0");
 			Debug.Break();
@@ -32,10 +33,10 @@ public class CWorldManager : MonoBehaviour
 
 		List<int> t_aTestData = new List<int>();
 
-		for (int t_i = 0; t_i < ChunkSize * ChunkSize; t_i += 2)
+		for (int t_i = 0; t_i < ChunkHeight * ChunkWidth; t_i += 2)
 		{
 			t_aTestData.Add(0);
-			t_aTestData.Add(1);
+			t_aTestData.Add(0);
 		}
 
 		for (int t_i = 0; t_i < 1; ++t_i)

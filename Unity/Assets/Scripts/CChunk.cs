@@ -49,23 +49,6 @@ public class CChunk : MonoBehaviour
 			return;
 		}
 
-		Mesh t_mesh = m_meshFilter.mesh;
-		string t_strTris = "Tris: ";
-		for (int t_j = 0; t_j < t_mesh.triangles.Length; ++t_j)
-		{
-			t_strTris += t_mesh.triangles[t_j] + ", ";
-		}
-
-		Debug.Log(t_strTris);
-
-		string t_strVerts = "Verts: ";
-		for (int t_j = 0; t_j < t_mesh.vertices.Length; ++t_j)
-		{
-			t_strVerts += t_mesh.vertices[t_j].ToString() + ", ";
-		}
-
-		Debug.Log(t_strVerts);
-
 		int t_xSize = CWorldManager.Instance.ChunkWidth;
 		int t_ySize = CWorldManager.Instance.ChunkHeight;
 		int t_nTileSize = CWorldManager.Instance.TileSize;

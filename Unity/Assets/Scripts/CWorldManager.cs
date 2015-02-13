@@ -62,5 +62,12 @@ public class CWorldManager : MonoBehaviour
     #endregion
 
     #region Private Methods
+	private void vGenerateChunk()
+	{
+
+	}
+	private void vDeleteChunk()
+	{
+	}
     #endregion
 }

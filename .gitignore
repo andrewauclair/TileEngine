@@ -43,3 +43,7 @@ Temporary Items
 .apdisk
 Unity/Library
 Unity/Temp
+*.csproj
+*.sln
+*.suo
+*.cache

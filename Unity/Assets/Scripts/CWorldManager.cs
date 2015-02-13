@@ -1,0 +1,65 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+
+public class CWorldManager : MonoBehaviour
+{
+    #region Static Data
+	public static CWorldManager Instance = null;
+    #endregion
+
+    #region Public Data
+	[Tooltip("Chunk size to load in a single mesh, screen size or greater recommended")]
+	public int ChunkSize = 0;
+	public int TileSize = 0;
+	public Material AtlasMat = null;
+    #endregion
+
+    #region Private Data
+	List<CChunk> m_aChunks = new List<CChunk>();
+    #endregion
+
+    #region Unity Methods
+    void Awake()
+    {
+		Instance = this;
+
+		if (ChunkSize <= 0)
+		{
+			Debug.LogError("Chunk size is <= 0");
+			Debug.Break();
+		}
+
+		List<int> t_aTestData = new List<int>();
+
+		for (int t_i = 0; t_i < ChunkSize * ChunkSize; t_i += 2)
+		{
+			t_aTestData.Add(0);
+			t_aTestData.Add(1);
+		}
+
+		for (int t_i = 0; t_i < 1; ++t_i)
+		{
+			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			t_obj.transform.position = Vector3.zero;
+
+			CChunk t_chunk = t_obj.AddComponent<CChunk>();
+			t_chunk.vSetData(t_aTestData);
+			t_chunk.vGenerateMesh();
+			m_aChunks.Add(t_chunk);
+		}
+    }
+    void Start()
+    {	
+	}
+	void Update()
+    {
+    }
+    #endregion
+
+    #region Public Methods
+    #endregion
+
+    #region Private Methods
+    #endregion
+}

@@ -1,9 +1,19 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
 public class CWorldManager : MonoBehaviour
 {
+	[SerializeField]
+	public enum Arrows
+	{
+		Left,
+		Right,
+		Up,
+		Down
+	}
+
     #region Static Data
 	public static CWorldManager Instance = null;
     #endregion
@@ -14,10 +24,16 @@ public class CWorldManager : MonoBehaviour
 	public int ChunkHeight = 0;
 	public int TileSize = 0;
 	public Material AtlasMat = null;
+
+	public float MoveSpeed = 10f;
     #endregion
 
     #region Private Data
 	List<CChunk> m_aChunks = new List<CChunk>();
+	private bool m_fLeftPressed = false;
+	private bool m_fRightPressed = false;
+	private bool m_fUpPressed = false;
+	private bool m_fDownPressed = false;
     #endregion
 
     #region Unity Methods
@@ -39,10 +55,11 @@ public class CWorldManager : MonoBehaviour
 			t_aTestData.Add(0);
 		}
 
-		for (int t_i = 0; t_i < 1; ++t_i)
+		for (int t_i = 0; t_i < 6; ++t_i)
 		{
 			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			t_obj.transform.position = new Vector3(-(TileSize / 2.0f), -(TileSize / 2.0f), 0f);
+			t_obj.transform.position = new Vector3(-(TileSize / 2.0f) + (ChunkWidth * t_i), -(TileSize / 2.0f), 0f);
+			t_obj.transform.parent = gameObject.transform;
 
 			CChunk t_chunk = t_obj.AddComponent<CChunk>();
 			t_chunk.vSetData(t_aTestData);
@@ -59,6 +76,29 @@ public class CWorldManager : MonoBehaviour
 		{
 			Application.LoadLevelAsync("Test2");
 		}
+		Vector3 t_v3Offset = Vector3.zero;
+
+		if (Input.GetKey(KeyCode.LeftArrow) || m_fLeftPressed)
+		{
+			t_v3Offset.x += MoveSpeed * Time.deltaTime;
+		}
+		if (Input.GetKey(KeyCode.RightArrow) || m_fRightPressed)
+		{
+			t_v3Offset.x -= MoveSpeed * Time.deltaTime;
+		}
+		if (Input.GetKey(KeyCode.UpArrow) || m_fUpPressed)
+		{
+			t_v3Offset.y -= MoveSpeed * Time.deltaTime;
+		}
+		if (Input.GetKey(KeyCode.DownArrow) || m_fDownPressed)
+		{
+			t_v3Offset.y += MoveSpeed * Time.deltaTime;
+		}
+
+		if (t_v3Offset != Vector3.zero)
+		{
+			vMoveChunks(t_v3Offset);
+		}
     }
     #endregion
 
@@ -73,5 +113,59 @@ public class CWorldManager : MonoBehaviour
 	private void vDeleteChunk()
 	{
 	}
-    #endregion
+	private void vMoveChunks(Vector3 p_v3Offset)
+	{
+		for (int t_i = 0; t_i < m_aChunks.Count; ++t_i)
+		{
+			m_aChunks[t_i].transform.position += p_v3Offset;
+		}
+	}
+	#endregion
+
+	#region Response Methods
+	public void vArrowDown(int p_key)
+	{
+		switch (p_key)
+		{
+			case 0:
+				{
+					m_fLeftPressed = true;
+				}break;
+			case 1:
+				{
+					m_fRightPressed = true;
+				}break;
+			case 2:
+				{
+					m_fUpPressed = true;
+				}break;
+			case 3:
+				{
+					m_fDownPressed = true;
+				}break;
+		}
+	}
+	public void vArrowUp(int p_key)
+	{
+		switch (p_key)
+		{
+			case 0:
+				{
+					m_fLeftPressed = false;
+				} break;
+			case 1:
+				{
+					m_fRightPressed = false;
+				} break;
+			case 2:
+				{
+					m_fUpPressed = false;
+				} break;
+			case 3:
+				{
+					m_fDownPressed = false;
+				} break;
+		}
+	}
+	#endregion
 }

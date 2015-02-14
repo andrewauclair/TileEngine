@@ -55,6 +55,10 @@ public class CWorldManager : MonoBehaviour
 	}
 	void Update()
     {
+		if (Input.GetKeyDown(KeyCode.Space))
+		{
+			Application.LoadLevelAsync("Test2");
+		}
     }
     #endregion
 

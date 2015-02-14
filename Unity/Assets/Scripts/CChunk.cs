@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 public class CChunk : MonoBehaviour
 {
@@ -76,14 +77,17 @@ public class CChunk : MonoBehaviour
 		{
 			for (int t_x = 0; t_x < t_xSize; ++t_x)
 			{
+				// calculate the center of this tile
 				float t_rx = -((t_xSize * t_nTileSize) / 2.0f) + (t_x * t_nTileSize) + (t_nTileSize / 2.0f);
 				float t_ry = -((t_ySize * t_nTileSize) / 2.0f) + (t_y * t_nTileSize) + (t_nTileSize / 2.0f);
 
+				// create the 4 vertices for this tile
 				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0); 
 				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0);
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0);
 
+				// TEMP: generate UV's to stagger the grass for now
 				int t_it = (t_y + t_x) % 3;
 				float t_rT = t_it * .125f;
 
@@ -105,24 +109,17 @@ public class CChunk : MonoBehaviour
 						}break;
 				}
 				
-
+				// generate the 2 triangles for this tile
 				t_aTriangles[t_iTri++] = t_iVert - 4;
 				t_aTriangles[t_iTri++] = t_iVert - 3;
 				t_aTriangles[t_iTri++] = t_iVert - 2;
 				t_aTriangles[t_iTri++] = t_iVert - 2;
 				t_aTriangles[t_iTri++] = t_iVert - 3;
 				t_aTriangles[t_iTri++] = t_iVert - 1;
-
-				//t_aTriangles[t_iTri++] = (t_y * (t_xSize + 1)) + t_x;
-				//t_aTriangles[t_iTri++] = ((t_y + 1) * (t_xSize + 1) )+ t_x;
-				//t_aTriangles[t_iTri++] = (t_y * (t_xSize + 1)) + t_x + 1;
-
-				//t_aTriangles[t_iTri++] = ((t_y + 1) * (t_xSize + 1)) + t_x;
-				//t_aTriangles[t_iTri++] = ((t_y + 1) * (t_xSize + 1)) + t_x + 1;
-				//t_aTriangles[t_iTri++] = (t_y * (t_xSize + 1)) + t_x + 1;
 			}
 		}
 
+		// set the mesh data, calculate the normals and set the mesh and material
 		m_mesh.vertices = t_aVertices;
 		m_mesh.triangles = t_aTriangles;
 		m_mesh.uv = t_aUVs;

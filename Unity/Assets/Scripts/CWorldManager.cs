@@ -26,6 +26,8 @@ public class CWorldManager : MonoBehaviour
 	public Material AtlasMat = null;
 
 	public float MoveSpeed = 10f;
+
+	public Animator MainCharAnimator = null;
     #endregion
 
     #region Private Data
@@ -34,6 +36,8 @@ public class CWorldManager : MonoBehaviour
 	private bool m_fRightPressed = false;
 	private bool m_fUpPressed = false;
 	private bool m_fDownPressed = false;
+
+	private Vector3 m_v3Target = Vector3.zero;
     #endregion
 
     #region Unity Methods
@@ -81,23 +85,32 @@ public class CWorldManager : MonoBehaviour
 		if (Input.GetKey(KeyCode.LeftArrow) || m_fLeftPressed)
 		{
 			t_v3Offset.x += MoveSpeed * Time.deltaTime;
+			MainCharAnimator.SetInteger("Direction", 1);
 		}
 		if (Input.GetKey(KeyCode.RightArrow) || m_fRightPressed)
 		{
 			t_v3Offset.x -= MoveSpeed * Time.deltaTime;
+			MainCharAnimator.SetInteger("Direction", 3);
 		}
 		if (Input.GetKey(KeyCode.UpArrow) || m_fUpPressed)
 		{
 			t_v3Offset.y -= MoveSpeed * Time.deltaTime;
+			MainCharAnimator.SetInteger("Direction", 2);
 		}
 		if (Input.GetKey(KeyCode.DownArrow) || m_fDownPressed)
 		{
 			t_v3Offset.y += MoveSpeed * Time.deltaTime;
+			MainCharAnimator.SetInteger("Direction", 0);
 		}
 
 		if (t_v3Offset != Vector3.zero)
 		{
+			MainCharAnimator.SetBool("Idle", false);
 			vMoveChunks(t_v3Offset);
+		}
+		else
+		{
+			MainCharAnimator.SetBool("Idle", true);
 		}
     }
     #endregion

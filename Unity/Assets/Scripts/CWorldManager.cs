@@ -36,6 +36,7 @@ public class CWorldManager : MonoBehaviour
 	private bool m_fRightPressed = false;
 	private bool m_fUpPressed = false;
 	private bool m_fDownPressed = false;
+	private bool m_fMoving = false;
 
 	private Vector3 m_v3Target = Vector3.zero;
     #endregion
@@ -76,33 +77,42 @@ public class CWorldManager : MonoBehaviour
 	}
 	void Update()
     {
-		if (Input.GetKeyDown(KeyCode.Space))
-		{
-			Application.LoadLevelAsync("Test2");
-		}
+#if UNITY_EDITOR
+		m_fLeftPressed = Input.GetKey(KeyCode.LeftArrow);
+		m_fRightPressed = Input.GetKey(KeyCode.RightArrow);
+		m_fUpPressed = Input.GetKey(KeyCode.UpArrow);
+		m_fDownPressed = Input.GetKey(KeyCode.DownArrow);
+#endif
 		Vector3 t_v3Offset = Vector3.zero;
 
 		if (Input.GetKey(KeyCode.LeftArrow) || m_fLeftPressed)
 		{
-			t_v3Offset.x += MoveSpeed * Time.deltaTime;
+			m_fMoving = true;
+			//t_v3Offset.x += MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 1);
 		}
 		if (Input.GetKey(KeyCode.RightArrow) || m_fRightPressed)
 		{
-			t_v3Offset.x -= MoveSpeed * Time.deltaTime;
+			m_fMoving = true;
+			//t_v3Offset.x -= MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 3);
 		}
 		if (Input.GetKey(KeyCode.UpArrow) || m_fUpPressed)
 		{
-			t_v3Offset.y -= MoveSpeed * Time.deltaTime;
+			m_fMoving = true;
+			//t_v3Offset.y -= MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 2);
 		}
 		if (Input.GetKey(KeyCode.DownArrow) || m_fDownPressed)
 		{
-			t_v3Offset.y += MoveSpeed * Time.deltaTime;
+			m_fMoving = true;
+			//t_v3Offset.y += MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 0);
 		}
 
+		if (m_fMoving)
+		{
+		}
 		if (t_v3Offset != Vector3.zero)
 		{
 			MainCharAnimator.SetBool("Idle", false);

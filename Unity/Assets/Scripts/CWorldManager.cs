@@ -42,7 +42,7 @@ public class CWorldManager : MonoBehaviour
 		for (int t_i = 0; t_i < 1; ++t_i)
 		{
 			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			t_obj.transform.position = Vector3.zero;
+			t_obj.transform.position = new Vector3(-(TileSize / 2.0f), -(TileSize / 2.0f), 0f);
 
 			CChunk t_chunk = t_obj.AddComponent<CChunk>();
 			t_chunk.vSetData(t_aTestData);

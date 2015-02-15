@@ -65,19 +65,15 @@ public class CWorldManager : MonoBehaviour
 		}
 
 		// load json file of uvs
-		FileStream t_FileStream = File.OpenRead(Application.dataPath + "/" + AtlasMat.name + ".json");
+		TextAsset t_Bytes = Resources.Load("JSON/" + AtlasMat.name) as TextAsset;
 
-		if (!t_FileStream.CanRead)
+		if (t_Bytes == null)
 		{
-			Debug.Log("File not found");
+			Debug.Log("File JSON/'" + AtlasMat.name + "' not found");
 		}
 		else
 		{
-			byte[] t_aBytes = new byte[t_FileStream.Length];
-			t_FileStream.Read(t_aBytes, 0, t_aBytes.Length);
-			t_FileStream.Close();
-
-			CByteStreamReader t_Reader = new CByteStreamReader(t_aBytes);
+			CByteStreamReader t_Reader = new CByteStreamReader(t_Bytes.bytes);
 			JSONObject t_obj = new JSONObject(t_Reader.strRead());
 
 			for (int t_i = 0; t_i < t_obj.Count; ++t_i)

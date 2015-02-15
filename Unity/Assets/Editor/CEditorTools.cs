@@ -88,7 +88,7 @@ public class CEditorTools : MonoBehaviour
 
 				Debug.Log(t_JSON.ToString());
 
-				FileStream t_File = File.Create(Application.dataPath + "/" + t_texture.name + ".json");
+				FileStream t_File = File.Create(Application.dataPath + "/Resources/JSON/" + t_texture.name + ".bytes");
 				CByteStreamWriter t_Writer = new CByteStreamWriter();
 
 				t_Writer.vWriteStr(t_JSON.ToString(true));
@@ -96,9 +96,9 @@ public class CEditorTools : MonoBehaviour
 				t_File.Write(t_Writer.ToArray(), 0, t_Writer.nArrayLength());
 				t_File.Close();
 
-				System.IO.File.WriteAllText(Application.dataPath + "/" + t_texture.name + "_readable.json", t_JSON.ToString(true));
+				//System.IO.File.WriteAllText(Application.dataPath + "/" + t_texture.name + "_readable.json", t_JSON.ToString(true));
 
-				Debug.Log("Saved file to: " + Application.dataPath + "/test.json");
+				Debug.Log("Saved file to: " + Application.dataPath + "/Resources/JSON/" + t_texture.name + ".json");
 			}
 		}
 	}

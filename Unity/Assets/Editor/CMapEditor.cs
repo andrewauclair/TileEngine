@@ -14,7 +14,17 @@ public class CMapEditor : EditorWindow
 
 	private int m_nTileSize = 32;
 	private int m_nSelectedTile = 0;
-	
+
+	public CMapEditor()
+	{
+		Debug.Log("CMapEditor Constructor");
+
+		if (PlayerPrefs.HasKey("MapEditorTextureID"))
+		{
+			m_tex2dTileset = (Texture2D)EditorUtility.InstanceIDToObject(PlayerPrefs.GetInt("MapEditorTextureID"));
+		}
+	}
+
 	public void InitData()
 	{
 		Debug.Log("show map editor");
@@ -42,6 +52,10 @@ public class CMapEditor : EditorWindow
 				m_lstTex2dMap[t_x][t_y].Apply();
 			}
 		}
+	}
+	void Close()
+	{
+		Debug.Log("Close Map Editor");
 	}
 	void OnGUI()
 	{
@@ -85,6 +99,7 @@ public class CMapEditor : EditorWindow
 		if (t_nID != t_nNewID)
 		{
 			Debug.Log("new texture");
+			PlayerPrefs.SetInt("MapEditorTextureID", t_nNewID);
 
 			int t_nTilesWidth = m_tex2dTileset.width / m_nTileSize;
 			int t_nTilesHeight = m_tex2dTileset.height / m_nTileSize;

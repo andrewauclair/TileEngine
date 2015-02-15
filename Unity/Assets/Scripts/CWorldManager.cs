@@ -100,12 +100,6 @@ public class CWorldManager : MonoBehaviour
 			}
 		}
 
-		//for (int t_i = 0; t_i < ChunkHeight * ChunkWidth; t_i += 2)
-		//{
-		//    t_aTestData.Add(0);
-		//    t_aTestData.Add(1);
-		//}
-
 		for (int t_i = 0; t_i < 1; ++t_i)
 		{
 			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -139,13 +133,11 @@ public class CWorldManager : MonoBehaviour
 		}
 		if (m_fRightPressed && !m_fMoving)
 		{
-			Debug.Log("right pressed");
 			m_fMoving = true;
 			MainCharAnimator.SetInteger("Direction", 3);
 			MainCharAnimator.SetBool("Idle", false);
 			m_v3Start = transform.position;
 			m_v3Target = new Vector3(m_v3Start.x - TileSize, m_v3Start.y, 0f);
-			Debug.Log("Start: " + m_v3Start + "\nEnd: " + m_v3Target);
 			m_v3Current = m_v3Start;
 		}
 		if (m_fUpPressed && !m_fMoving)
@@ -182,7 +174,6 @@ public class CWorldManager : MonoBehaviour
 
 			if (m_rTime >= MoveTime)
 			{
-				Debug.Log("Finished moving");
 				m_fMoving = false;
 				m_rTime = 0f;
 				MainCharAnimator.SetBool("Idle", true);

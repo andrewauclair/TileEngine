@@ -83,13 +83,30 @@ public class CWorldManager : MonoBehaviour
 		}
 		List<int> t_aTestData = new List<int>();
 
-		for (int t_i = 0; t_i < ChunkHeight * ChunkWidth; t_i += 2)
+		t_Bytes = Resources.Load("JSON/testmap") as TextAsset;
+
+		if (t_Bytes == null)
 		{
-			t_aTestData.Add(0);
-			t_aTestData.Add(1);
+			Debug.Log("Can't find test map");
+		}
+		else
+		{
+			CByteStreamReader t_Reader = new CByteStreamReader(t_Bytes.bytes);
+			JSONObject t_obj = new JSONObject(t_Reader.strRead());
+
+			for (int t_i = 0; t_i < t_obj.Count; ++t_i)
+			{
+				t_aTestData.Add(Mathf.RoundToInt(t_obj[t_i].n));
+			}
 		}
 
-		for (int t_i = 0; t_i < 6; ++t_i)
+		//for (int t_i = 0; t_i < ChunkHeight * ChunkWidth; t_i += 2)
+		//{
+		//    t_aTestData.Add(0);
+		//    t_aTestData.Add(1);
+		//}
+
+		for (int t_i = 0; t_i < 1; ++t_i)
 		{
 			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			t_obj.transform.position = new Vector3(-(TileSize / 2.0f) + (ChunkWidth * t_i), -(TileSize / 2.0f), 0f);

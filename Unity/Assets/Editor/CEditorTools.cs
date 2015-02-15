@@ -18,8 +18,8 @@ public class CEditorTools : MonoBehaviour
 	[MenuItem(msc_strToolsName + "/Map Editor")]
 	private static void vOpenMapEditor()
 	{
-		EditorWindow t_window = EditorWindow.GetWindow(typeof(CMapEditor));
-		
+		CMapEditor t_mapEditor = (CMapEditor)EditorWindow.GetWindow(typeof(CMapEditor));
+		t_mapEditor.InitData();
 	}
 
 	[MenuItem(msc_strToolsName + "/Generate tile sheet json")]

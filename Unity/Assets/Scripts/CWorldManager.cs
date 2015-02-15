@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 public class CWorldManager : MonoBehaviour
 {
@@ -25,20 +26,31 @@ public class CWorldManager : MonoBehaviour
 	public int TileSize = 0;
 	public Material AtlasMat = null;
 
-	public float MoveSpeed = 10f;
+	public float MoveTime = 1f;
 
 	public Animator MainCharAnimator = null;
+
+	[HideInInspector]
+	public List<CTile> lstTiles = new List<CTile>();
     #endregion
 
     #region Private Data
 	List<CChunk> m_aChunks = new List<CChunk>();
+	
 	private bool m_fLeftPressed = false;
 	private bool m_fRightPressed = false;
 	private bool m_fUpPressed = false;
 	private bool m_fDownPressed = false;
+	private bool m_fLeftInput = false;
+	private bool m_fRightInput = false;
+	private bool m_fUpInput = false;
+	private bool m_fDownInput = false;
 	private bool m_fMoving = false;
 
+	private Vector3 m_v3Start = Vector3.zero;
 	private Vector3 m_v3Target = Vector3.zero;
+	private Vector3 m_v3Current = Vector3.zero;
+	private float m_rTime = 0.0f;
     #endregion
 
     #region Unity Methods
@@ -52,12 +64,33 @@ public class CWorldManager : MonoBehaviour
 			Debug.Break();
 		}
 
+		// load json file of uvs
+		FileStream t_FileStream = File.OpenRead(Application.dataPath + "/" + AtlasMat.name + ".json");
+
+		if (!t_FileStream.CanRead)
+		{
+			Debug.Log("File not found");
+		}
+		else
+		{
+			byte[] t_aBytes = new byte[t_FileStream.Length];
+			t_FileStream.Read(t_aBytes, 0, t_aBytes.Length);
+			t_FileStream.Close();
+
+			CByteStreamReader t_Reader = new CByteStreamReader(t_aBytes);
+			JSONObject t_obj = new JSONObject(t_Reader.strRead());
+
+			for (int t_i = 0; t_i < t_obj.Count; ++t_i)
+			{
+				lstTiles.Add(new CTile(t_obj[t_i]));
+			}
+		}
 		List<int> t_aTestData = new List<int>();
 
 		for (int t_i = 0; t_i < ChunkHeight * ChunkWidth; t_i += 2)
 		{
 			t_aTestData.Add(0);
-			t_aTestData.Add(0);
+			t_aTestData.Add(1);
 		}
 
 		for (int t_i = 0; t_i < 6; ++t_i)
@@ -77,50 +110,70 @@ public class CWorldManager : MonoBehaviour
 	}
 	void Update()
     {
-#if UNITY_EDITOR
-		m_fLeftPressed = Input.GetKey(KeyCode.LeftArrow);
-		m_fRightPressed = Input.GetKey(KeyCode.RightArrow);
-		m_fUpPressed = Input.GetKey(KeyCode.UpArrow);
-		m_fDownPressed = Input.GetKey(KeyCode.DownArrow);
-#endif
-		Vector3 t_v3Offset = Vector3.zero;
-
-		if (Input.GetKey(KeyCode.LeftArrow) || m_fLeftPressed)
+		m_fLeftPressed = m_fLeftInput || Input.GetKey(KeyCode.LeftArrow);
+		m_fRightPressed = m_fRightInput || Input.GetKey(KeyCode.RightArrow);
+		m_fUpPressed = m_fUpInput || Input.GetKey(KeyCode.UpArrow);
+		m_fDownPressed = m_fDownInput || Input.GetKey(KeyCode.DownArrow);
+		
+		if (m_fLeftPressed && !m_fMoving)
 		{
 			m_fMoving = true;
-			//t_v3Offset.x += MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 1);
+			MainCharAnimator.SetBool("Idle", false);
+			m_v3Start = transform.position;
+			m_v3Target = new Vector3(m_v3Start.x + TileSize, m_v3Start.y, 0f);
+			m_v3Current = m_v3Start;
 		}
-		if (Input.GetKey(KeyCode.RightArrow) || m_fRightPressed)
+		if (m_fRightPressed && !m_fMoving)
 		{
+			Debug.Log("right pressed");
 			m_fMoving = true;
-			//t_v3Offset.x -= MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 3);
+			MainCharAnimator.SetBool("Idle", false);
+			m_v3Start = transform.position;
+			m_v3Target = new Vector3(m_v3Start.x - TileSize, m_v3Start.y, 0f);
+			Debug.Log("Start: " + m_v3Start + "\nEnd: " + m_v3Target);
+			m_v3Current = m_v3Start;
 		}
-		if (Input.GetKey(KeyCode.UpArrow) || m_fUpPressed)
+		if (m_fUpPressed && !m_fMoving)
 		{
 			m_fMoving = true;
-			//t_v3Offset.y -= MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 2);
+			MainCharAnimator.SetBool("Idle", false);
+			m_v3Start = transform.position;
+			m_v3Target = new Vector3(m_v3Start.x, m_v3Start.y - TileSize, 0f);
+			m_v3Current = m_v3Start;
 		}
-		if (Input.GetKey(KeyCode.DownArrow) || m_fDownPressed)
+		if (m_fDownPressed && !m_fMoving)
 		{
 			m_fMoving = true;
-			//t_v3Offset.y += MoveSpeed * Time.deltaTime;
 			MainCharAnimator.SetInteger("Direction", 0);
+			MainCharAnimator.SetBool("Idle", false);
+			m_v3Start = transform.position;
+			m_v3Target = new Vector3(m_v3Start.x, m_v3Start.y + TileSize, 0f);
+			m_v3Current = m_v3Start;
 		}
 
 		if (m_fMoving)
 		{
-		}
-		if (t_v3Offset != Vector3.zero)
-		{
-			MainCharAnimator.SetBool("Idle", false);
+			Vector3 t_v3Offset = Vector3.zero;
+
+			m_rTime += Time.deltaTime;
+			
+			Vector3 t_v3Pos = Vector3.Lerp(m_v3Start, m_v3Target, Mathf.Min(m_rTime / MoveTime, 1.0f));
+
+			t_v3Offset = t_v3Pos - m_v3Current;
+			m_v3Current = t_v3Pos;
+
 			vMoveChunks(t_v3Offset);
-		}
-		else
-		{
-			MainCharAnimator.SetBool("Idle", true);
+
+			if (m_rTime >= MoveTime)
+			{
+				Debug.Log("Finished moving");
+				m_fMoving = false;
+				m_rTime = 0f;
+				MainCharAnimator.SetBool("Idle", true);
+			}
 		}
     }
     #endregion
@@ -152,19 +205,19 @@ public class CWorldManager : MonoBehaviour
 		{
 			case 0:
 				{
-					m_fLeftPressed = true;
+					m_fLeftInput = true;
 				}break;
 			case 1:
 				{
-					m_fRightPressed = true;
+					m_fRightInput = true;
 				}break;
 			case 2:
 				{
-					m_fUpPressed = true;
+					m_fUpInput = true;
 				}break;
 			case 3:
 				{
-					m_fDownPressed = true;
+					m_fDownInput = true;
 				}break;
 		}
 	}
@@ -174,19 +227,19 @@ public class CWorldManager : MonoBehaviour
 		{
 			case 0:
 				{
-					m_fLeftPressed = false;
+					m_fLeftInput = false;
 				} break;
 			case 1:
 				{
-					m_fRightPressed = false;
+					m_fRightInput = false;
 				} break;
 			case 2:
 				{
-					m_fUpPressed = false;
+					m_fUpInput = false;
 				} break;
 			case 3:
 				{
-					m_fDownPressed = false;
+					m_fDownInput = false;
 				} break;
 		}
 	}

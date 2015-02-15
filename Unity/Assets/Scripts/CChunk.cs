@@ -56,16 +56,12 @@ public class CChunk : MonoBehaviour
 
 		int t_cTiles = t_xSize * t_ySize;
 		int t_cTris = t_cTiles * 2;
-		int t_cVerts = (t_xSize + 1) * (t_ySize + 1);
-
+		
 		m_mesh = new Mesh();
 
 		Vector3[] t_aVertices = new Vector3[t_cTiles * 4];
-		Vector3[] t_aNormals = new Vector3[t_cTiles * 4];
 		Vector2[] t_aUVs = new Vector2[t_cTiles * 4];
 		int[] t_aTriangles = new int[t_cTris * 3];
-
-		int t_i = 0;
 
 		int t_iVert = 0;
 		int t_iTri = 0;
@@ -91,24 +87,13 @@ public class CChunk : MonoBehaviour
 				int t_it = (t_y + t_x) % 3;
 				float t_rT = t_it * .125f;
 
-				switch (m_aData[(t_y * t_xSize) + t_x])
-				{
-					case 0:
-						{
-							t_aUVs[t_iUV++] = new Vector2(t_rT + .125f, .75f); 
-							t_aUVs[t_iUV++] = new Vector2(t_rT + .125f, 1); 
-							t_aUVs[t_iUV++] = new Vector2(t_rT, .75f); 
-							t_aUVs[t_iUV++] = new Vector2(t_rT, 1);
-						}break;
-					case 1:
-						{
-							t_aUVs[t_iUV++] = new Vector2(0, 0);
-							t_aUVs[t_iUV++] = new Vector2(0, m_nPixelSize / (float)t_nTextureHeight);
-							t_aUVs[t_iUV++] = new Vector2(m_nPixelSize / (float)t_nTextureWidth, 0);
-							t_aUVs[t_iUV++] = new Vector2(m_nPixelSize / (float)t_nTextureWidth, m_nPixelSize / (float)t_nTextureHeight);
-						}break;
-				}
-				
+				CTile t_Tile = CWorldManager.Instance.lstTiles[m_aData[(t_y * t_xSize) + t_x]];
+
+				t_aUVs[t_iUV++] = t_Tile.UV1;
+				t_aUVs[t_iUV++] = t_Tile.UV2;
+				t_aUVs[t_iUV++] = t_Tile.UV3;
+				t_aUVs[t_iUV++] = t_Tile.UV4;
+
 				// generate the 2 triangles for this tile
 				t_aTriangles[t_iTri++] = t_iVert - 4;
 				t_aTriangles[t_iTri++] = t_iVert - 3;

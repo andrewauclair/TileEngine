@@ -78,29 +78,25 @@ public class CChunk : MonoBehaviour
 				float t_ry = -((t_ySize * t_nTileSize) / 2.0f) + (t_y * t_nTileSize) + (t_nTileSize / 2.0f);
 
 				// create the 4 vertices for this tile
-				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0); 
-				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0);
-				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
+				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0); 
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0);
-
-				// TEMP: generate UV's to stagger the grass for now
-				int t_it = (t_y + t_x) % 3;
-				float t_rT = t_it * .125f;
+				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
+				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
 
 				CTile t_Tile = CWorldManager.Instance.lstTiles[m_aData[(t_y * t_xSize) + t_x]];
 
-				t_aUVs[t_iUV++] = t_Tile.UV1;
+				t_aUVs[t_iUV++] = t_Tile.UV4;
 				t_aUVs[t_iUV++] = t_Tile.UV2;
 				t_aUVs[t_iUV++] = t_Tile.UV3;
-				t_aUVs[t_iUV++] = t_Tile.UV4;
+				t_aUVs[t_iUV++] = t_Tile.UV1;
 
 				// generate the 2 triangles for this tile
-				t_aTriangles[t_iTri++] = t_iVert - 4;
-				t_aTriangles[t_iTri++] = t_iVert - 3;
-				t_aTriangles[t_iTri++] = t_iVert - 2;
-				t_aTriangles[t_iTri++] = t_iVert - 2;
-				t_aTriangles[t_iTri++] = t_iVert - 3;
-				t_aTriangles[t_iTri++] = t_iVert - 1;
+				t_aTriangles[t_iTri++] = t_iVert - 4; // 0
+				t_aTriangles[t_iTri++] = t_iVert - 3; // 1
+				t_aTriangles[t_iTri++] = t_iVert - 2; // 2
+				t_aTriangles[t_iTri++] = t_iVert - 2; // 2
+				t_aTriangles[t_iTri++] = t_iVert - 3; // 1
+				t_aTriangles[t_iTri++] = t_iVert - 1; // 3
 			}
 		}
 

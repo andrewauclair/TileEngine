@@ -61,17 +61,12 @@ public class CEditorTools : MonoBehaviour
 						int t_nTile = ((t_nTilesHeight - 1 - t_y) * t_nTilesWidth) + t_x;
 
 						t_tile.Tile = t_nTile;
-
-						t_tile.UV1 = new Vector2( (t_x * t_rUVWidth) + t_rUVWidth, t_y * t_rUVHeight);
+						
+						t_tile.UV1 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, t_y * t_rUVHeight);
 						t_tile.UV2 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);
 						t_tile.UV3 = new Vector2(t_x * t_rUVWidth, t_y * t_rUVHeight);
 						t_tile.UV4 = new Vector2(t_x * t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);
-
-						Debug.Log("uv1: " + ((t_x * t_rUVWidth) + t_rUVWidth) + ", " + (t_y * t_rUVHeight) + "\n" + 
-								  "uv2: " + ((t_x * t_rUVWidth) + t_rUVWidth) + ", " + ((t_y * t_rUVHeight) + t_rUVHeight) + "\n" +
-								  "uv3: " + (t_x * t_rUVWidth) + ", " + (t_y * t_rUVHeight) + "\n" +
-								  "uv4: " + (t_x * t_rUVWidth) + ", " + ((t_y * t_rUVHeight) + t_rUVHeight));
-
+						
 						t_lstTiles.Add(t_tile);
 					}
 				}
@@ -86,7 +81,8 @@ public class CEditorTools : MonoBehaviour
 					t_JSON.Add(t_Tile.ToJSON());
 				}
 
-				Debug.Log(t_JSON.ToString());
+				// Delete old file if there is one
+				//File.Delete(Application.dataPath + "/Resources/JSON/" + t_texture.name + ".bytes");
 
 				FileStream t_File = File.Create(Application.dataPath + "/Resources/JSON/" + t_texture.name + ".bytes");
 				CByteStreamWriter t_Writer = new CByteStreamWriter();
@@ -96,7 +92,7 @@ public class CEditorTools : MonoBehaviour
 				t_File.Write(t_Writer.ToArray(), 0, t_Writer.nArrayLength());
 				t_File.Close();
 
-				//System.IO.File.WriteAllText(Application.dataPath + "/" + t_texture.name + "_readable.json", t_JSON.ToString(true));
+				AssetDatabase.Refresh();
 
 				Debug.Log("Saved file to: " + Application.dataPath + "/Resources/JSON/" + t_texture.name + ".json");
 			}

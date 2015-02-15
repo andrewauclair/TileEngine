@@ -77,6 +77,8 @@ public class CMapEditor : EditorWindow
 
 				t_File.Write(t_Writer.ToArray(), 0, t_Writer.nArrayLength());
 				t_File.Close();
+
+				AssetDatabase.Refresh();
 			}
 		}
 

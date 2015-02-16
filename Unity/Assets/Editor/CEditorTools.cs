@@ -15,13 +15,6 @@ public class CEditorTools : MonoBehaviour
         PlayerPrefs.DeleteAll();
     }
 
-	[MenuItem(msc_strToolsName + "/Map Editor")]
-	private static void vOpenMapEditor()
-	{
-		CMapEditor t_mapEditor = (CMapEditor)EditorWindow.GetWindow(typeof(CMapEditor));
-		t_mapEditor.InitData();
-	}
-
 	[MenuItem(msc_strToolsName + "/Generate tile sheet json")]
 	private static void vGenerateTilesheetJSON()
 	{
@@ -84,18 +77,29 @@ public class CEditorTools : MonoBehaviour
 				// Delete old file if there is one
 				//File.Delete(Application.dataPath + "/Resources/JSON/" + t_texture.name + ".bytes");
 
-				FileStream t_File = File.Create(Application.dataPath + "/Resources/JSON/" + t_texture.name + ".bytes");
+				// check for Tilesets folder
+				Directory.CreateDirectory(Application.dataPath + "/Resources/Tilesets");
+
+				FileStream t_File = File.Create(Application.dataPath + "/Resources/Tilesets/" + t_texture.name + ".bytes");
 				CByteStreamWriter t_Writer = new CByteStreamWriter();
 
-				t_Writer.vWriteStr(t_JSON.ToString(true));
+				t_Writer.vWriteStr(t_JSON.ToString());
 
 				t_File.Write(t_Writer.ToArray(), 0, t_Writer.nArrayLength());
 				t_File.Close();
 
 				AssetDatabase.Refresh();
 
-				Debug.Log("Saved file to: " + Application.dataPath + "/Resources/JSON/" + t_texture.name + ".json");
+				Debug.Log("Saved file to: " + Application.dataPath + "/Resources/Tilesets/" + t_texture.name + ".json");
 			}
 		}
+	}
+
+	[MenuItem(msc_strToolsName + "/Scene Setup")]
+	private static void vSetupScene()
+	{
+		// Camera with CFixedCamera set to the default value for height
+		// Instance of Canvas prefab with arrow controls
+		// CEditorManager - This script handles editing the tile meshes
 	}
 }

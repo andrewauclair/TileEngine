@@ -65,11 +65,11 @@ public class CWorldManager : MonoBehaviour
 		}
 
 		// load json file of uvs
-		TextAsset t_Bytes = Resources.Load("JSON/" + AtlasMat.name) as TextAsset;
+		TextAsset t_Bytes = Resources.Load("Tilesets/" + AtlasMat.name) as TextAsset;
 
 		if (t_Bytes == null)
 		{
-			Debug.Log("File JSON/'" + AtlasMat.name + "' not found");
+			Debug.Log("File Tilesets/'" + AtlasMat.name + "' not found");
 		}
 		else
 		{

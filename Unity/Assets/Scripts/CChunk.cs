@@ -73,6 +73,10 @@ public class CChunk : MonoBehaviour
 		{
 			for (int t_x = 0; t_x < t_xSize; ++t_x)
 			{
+				if (t_y == 4 && t_x == 4)
+				{
+					continue;
+				}
 				// calculate the center of this tile
 				float t_rx = -((t_xSize * t_nTileSize) / 2.0f) + (t_x * t_nTileSize) + (t_nTileSize / 2.0f);
 				float t_ry = -((t_ySize * t_nTileSize) / 2.0f) + (t_y * t_nTileSize) + (t_nTileSize / 2.0f);

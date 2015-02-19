@@ -6,15 +6,21 @@ using UnityEngine;
 
 public class CMapEditor : EditorWindow
 {
+	#region Static Data
+	private static int[] ms_aTileSizeValues = { 16, 32, 64 };
+	private static string[] ms_aTileSizeDisplays = { "16", "32", "64" };
+	#endregion
+
 	private Texture2D m_tex2dTileset = null;
 
-	private List<Texture2D> m_lstTex2dTiles = new List<Texture2D>();
-	private List<List<Texture2D>> m_lstTex2dMap = new List<List<Texture2D>>();
 	private List<List<int>> m_lstTileNums = new List<List<int>>();
 
 	private string[] m_aStrTilesets = new string[0];
+	
+	private Vector2 m_v2PrevPos = Vector2.zero;
+	private Vector2 m_v2ScrollPos = Vector2.zero;
+	private Vector2 m_v2TexturePos = Vector2.zero;
 
-	private Vector2 m_v2PrevPos = new Vector2(0, 0);
 	private int m_nTileSize = 32;
 	private int m_nSelectedTile = 0;
 	private int m_nSelectedTileset = 0;
@@ -25,54 +31,19 @@ public class CMapEditor : EditorWindow
 	[MenuItem(CEditorTools.msc_strToolsName + "/Map Editor")]
 	private static void Init()
 	{
-		CMapEditor t_mapEditor = (CMapEditor)EditorWindow.GetWindow(typeof(CMapEditor));//<CMapEditor>("Map Editor", true, typeof(SceneView));
-		//t_mapEditor.position = new Rect(250.0f, 200.0f, 1000.0f, 750.0f);
+		CMapEditor t_mapEditor = (CMapEditor)EditorWindow.GetWindow(typeof(CMapEditor));
 	}
 
 	public CMapEditor()
 	{
-		Debug.Log("CMapEditor Constructor");
-		InitData();
-		//if (PlayerPrefs.HasKey("MapEditorTextureID"))
-		//{
-		//    m_tex2dTileset = (Texture2D)EditorUtility.InstanceIDToObject(PlayerPrefs.GetInt("MapEditorTextureID"));
-		//}
-		try { SceneView.onSceneGUIDelegate -= SceneGUI; }
-		catch { }
 		SceneView.onSceneGUIDelegate += SceneGUI;
+
+		vRefreshTilesetList();
+		vGenerateTilesetTexture();
 	}
-
-	public void InitData()
+	public void OnDestroy()
 	{
-		Debug.Log("show map editor");
-
-		//m_lstTex2dMap.Clear();
-
-		//for (int t_x = 0; t_x < 1; ++t_x)
-		//{
-		//    m_lstTex2dMap.Add(new List<Texture2D>());
-		//    m_lstTileNums.Add(new List<int>());
-
-		//    for (int t_y = 0; t_y < 1; ++t_y)
-		//    {
-		//        m_lstTex2dMap[t_x].Add(new Texture2D(m_nTileSize * 30, m_nTileSize * 30, TextureFormat.RGBA32, false));
-		//        m_lstTileNums[t_x].Add(0);
-
-		//        for (int t_i = 0; t_i < m_nTileSize * 30; ++t_i)
-		//        {
-		//            for (int t_j = 0; t_j < m_nTileSize * 30; ++t_j)
-		//            {
-		//                m_lstTex2dMap[t_x][t_y].SetPixel(t_i, t_j, new Color(t_x / 30.0f, t_y / 30.0f, 0, 1.0f));
-		//            }
-		//        }
-
-		//        m_lstTex2dMap[t_x][t_y].Apply();
-		//    }
-		//}
-	}
-	void Close()
-	{
-		Debug.Log("Close Map Editor");
+		SceneView.onSceneGUIDelegate -= SceneGUI;
 	}
 	void Update()
 	{
@@ -94,6 +65,9 @@ public class CMapEditor : EditorWindow
 		}
 
 		m_fEnabled = t_fEnabled;
+
+		
+
 		//EditorGUILayout.BeginHorizontal(GUILayout.Width(250.0f), GUILayout.Height(750.0f));
 
 		//EditorGUILayout.BeginHorizontal();
@@ -108,7 +82,27 @@ public class CMapEditor : EditorWindow
 		//    t_aNames.Add(t_i.ToString());
 		//}
 
+		int t_nPrevTileset = m_nSelectedTileset;
+		int t_nPrevTileSize = m_nTileSize;
+
 		m_nSelectedTileset = EditorGUILayout.Popup("Tileset", m_nSelectedTileset, m_aStrTilesets);
+		m_nTileSize = EditorGUILayout.IntPopup("Tile Size", m_nTileSize, ms_aTileSizeDisplays, ms_aTileSizeValues);
+
+
+		if (m_nSelectedTileset != t_nPrevTileset)
+		{
+			// update the tileset texture
+		}
+
+		if (m_nTileSize != t_nPrevTileSize)
+		{
+			// update the tileset texture
+		}
+
+		if (m_tex2dTileset != null && position.width + m_nTileSize < m_tex2dTileset.width)
+		{
+			// update the tileset texture
+		}
 
 		//EditorGUILayout.IntPopup("test: ", 0, t_aNames.ToArray(), t_aInts.ToArray());
 
@@ -194,7 +188,12 @@ public class CMapEditor : EditorWindow
 
 		//EditorGUILayout.BeginHorizontal();
 
-		//m_v2ScrollPos = EditorGUILayout.BeginScrollView(m_v2ScrollPos, true, true, GUILayout.Height(750.0f), GUILayout.Width(750.0f));//, GUILayout.ExpandHeight(true), GUILayout.ExpandWidth(true));
+		m_v2ScrollPos = EditorGUILayout.BeginScrollView(m_v2ScrollPos);
+
+		if (m_tex2dTileset != null)
+		{
+			EditorGUI.DrawTextureTransparent(new Rect(0, 0, m_tex2dTileset.width, m_tex2dTileset.height), m_tex2dTileset);
+		}
 
 		//for (int t_i = 0; t_i < m_lstTex2dMap.Count; ++t_i)
 		//{
@@ -213,7 +212,11 @@ public class CMapEditor : EditorWindow
 		//        //}
 		//    }
 		//}
-		//EditorGUILayout.EndScrollView();
+		EditorGUILayout.EndScrollView(); 
+		
+		Rect t_rectLast = GUILayoutUtility.GetLastRect();
+		m_v2TexturePos = new Vector2(t_rectLast.x, t_rectLast.y);
+		vCheckInput();
 		//m_nTileSize = EditorGUILayout.IntField("Pixel Size", m_nTileSize);//, GUILayout.MaxWidth(80f));
 		
 		//EditorGUILayout.EndHorizontal();
@@ -276,6 +279,7 @@ public class CMapEditor : EditorWindow
 	private void vRefreshTilesetList()
 	{
 		string[] t_aStrTilesets = Directory.GetFiles(Application.dataPath + "/Resources/Tilesets", "*.bytes");
+		string[] t_aStrTextures = Directory.GetFiles(Application.dataPath + "/Art/Tilesets", "*.png");
 
 		if (t_aStrTilesets.Length != m_aStrTilesets.Length)
 		{
@@ -289,9 +293,17 @@ public class CMapEditor : EditorWindow
 			Array.Copy(t_aStrTilesets, m_aStrTilesets, t_aStrTilesets.Length);
 		}
 	}
-	// Save the active map whenever it is changed
-	private void vSaveMap()
+	private void vGenerateTilesetTexture()
 	{
+		// Find the texture that goes along with the tileset
+		byte[] t_aBytes = File.ReadAllBytes(Application.dataPath + "/Art/Tilesets/" + m_aStrTilesets[m_nSelectedTileset] + ".png");
+		Texture2D t_texture = new Texture2D(1,1);
+
+		if (t_texture.LoadImage(t_aBytes))
+		{
+			m_tex2dTileset = t_texture;
+			m_tex2dTileset.hideFlags = HideFlags.HideAndDontSave;
+		}
 	}
 	private void vCheckInput()
 	{
@@ -309,25 +321,24 @@ public class CMapEditor : EditorWindow
 		}
 
 		vCheckTileInput(t_fMouseDown, t_fMouseUp, t_Event.mousePosition);
-		vCheckMapInput(t_fMouseDown, t_fMouseUp, t_Event.mousePosition);
 	}
 	private void vCheckTileInput(bool p_fMouseDown, bool p_fMouseUp, Vector2 p_v2MousePos)
 	{
-	}
-	private void vCheckMapInput(bool p_fMouseDown, bool p_fMouseUp, Vector2 p_v2MousePos)
-	{
-		for (int t_i = 0; t_i < m_lstTex2dMap.Count; ++t_i)
+		if (p_fMouseDown)
 		{
+			int p_xTile = Mathf.FloorToInt((p_v2MousePos.x - m_v2TexturePos.x) / (float)m_nTileSize);
+			int p_yTile = Mathf.FloorToInt((p_v2MousePos.y - m_v2TexturePos.y) / (float)m_nTileSize);
+
+			int p_nTile = (p_yTile * (m_tex2dTileset.width / m_nTileSize)) + p_xTile;
+			m_nSelectedTile = p_nTile;
 		}
 	}
 	private Vector2 v2GridPos(Vector2 p_v2MousePos, SceneView p_sceneView)
 	{
+		// REF: http://forum.unity3d.com/threads/screenpointtoray-with-event-mouseposition.119584/
 		Camera t_camera = p_sceneView.camera;
 		Vector2 t_v2Pos = t_camera.ScreenToWorldPoint(new Vector3(p_v2MousePos.x, t_camera.pixelHeight - p_v2MousePos.y, 0));
-		Debug.Log("screen to world: " + t_v2Pos);
-		//t_v2Pos.z = 0;
-		//t_v2Pos.y *= -1;
-
+		
 		t_v2Pos.x = Mathf.RoundToInt(t_v2Pos.x);
 		t_v2Pos.y = Mathf.RoundToInt(t_v2Pos.y);
 
@@ -339,7 +350,11 @@ public class CMapEditor : EditorWindow
 
 		Vector2 t_v2Chunk = new Vector2(Mathf.RoundToInt(p_v2Pos.x / t_rChunkSize), Mathf.RoundToInt(p_v2Pos.y / t_rChunkSize));
 
-		CChunkEditorGen.Instance.vAddTile(new CTile(), p_v2Pos);
+		CTile t_tile = new CTile();
+		t_tile.Tile = m_nSelectedTile;
+		Debug.Log("selected tile: " + m_nSelectedTile);
+
+		CChunkEditorGen.Instance.vAddTile(t_tile, p_v2Pos);
 	}
 	#endregion
 }

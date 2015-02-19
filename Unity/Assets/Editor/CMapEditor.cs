@@ -14,26 +14,29 @@ public class CMapEditor : EditorWindow
 
 	private string[] m_aStrTilesets = new string[0];
 
-	private Vector2 m_v2ScrollPos = new Vector2(0, 0);
+	private Vector2 m_v2PrevPos = new Vector2(0, 0);
 	private int m_nTileSize = 32;
 	private int m_nSelectedTile = 0;
 	private int m_nSelectedTileset = 0;
 
+	private bool m_fEnabled = false;
+	private bool m_fShiftDown = false;
+
 	[MenuItem(CEditorTools.msc_strToolsName + "/Map Editor")]
 	private static void Init()
 	{
-		CMapEditor t_mapEditor = (CMapEditor)EditorWindow.GetWindow<CMapEditor>("Map Editor", true, typeof(SceneView));
-		t_mapEditor.position = new Rect(250.0f, 200.0f, 1000.0f, 750.0f);
+		CMapEditor t_mapEditor = (CMapEditor)EditorWindow.GetWindow(typeof(CMapEditor));//<CMapEditor>("Map Editor", true, typeof(SceneView));
+		//t_mapEditor.position = new Rect(250.0f, 200.0f, 1000.0f, 750.0f);
 	}
 
 	public CMapEditor()
 	{
 		Debug.Log("CMapEditor Constructor");
 		InitData();
-		if (PlayerPrefs.HasKey("MapEditorTextureID"))
-		{
-			m_tex2dTileset = (Texture2D)EditorUtility.InstanceIDToObject(PlayerPrefs.GetInt("MapEditorTextureID"));
-		}
+		//if (PlayerPrefs.HasKey("MapEditorTextureID"))
+		//{
+		//    m_tex2dTileset = (Texture2D)EditorUtility.InstanceIDToObject(PlayerPrefs.GetInt("MapEditorTextureID"));
+		//}
 		try { SceneView.onSceneGUIDelegate -= SceneGUI; }
 		catch { }
 		SceneView.onSceneGUIDelegate += SceneGUI;
@@ -77,19 +80,20 @@ public class CMapEditor : EditorWindow
 	}
 	void OnGUI()
 	{
-		//Debug.Log("ortho: " + SceneView.lastActiveSceneView.camera.isOrthoGraphic);
-		// Input testing
-		Event t_event = Event.current;
-
-		if (t_event.type == EventType.MouseDown)
+		if (!SceneView.lastActiveSceneView.in2DMode)
 		{
-			Debug.Log("Mouse clicked: " + t_event.mousePosition);
-		}
-		else if (t_event.type == EventType.MouseUp)
-		{
-			Debug.Log("Mouse released: " + t_event.mousePosition);
+			EditorGUILayout.LabelField("Please put the scene camera in 2D mode.");
+			return;
 		}
 
+		bool t_fEnabled = EditorGUILayout.Toggle("Editing", m_fEnabled);
+
+		if (t_fEnabled != m_fEnabled && t_fEnabled)
+		{
+			Selection.objects = new UnityEngine.Object[0];
+		}
+
+		m_fEnabled = t_fEnabled;
 		//EditorGUILayout.BeginHorizontal(GUILayout.Width(250.0f), GUILayout.Height(750.0f));
 
 		//EditorGUILayout.BeginHorizontal();
@@ -216,11 +220,55 @@ public class CMapEditor : EditorWindow
 	}
 	public void SceneGUI(SceneView p_sceneView)
 	{
+		if (!m_fEnabled)
+		{
+			return;
+		}
+		
 		Event t_Event = Event.current;
 
+		int t_nControlID = GUIUtility.GetControlID(GetHashCode(), FocusType.Passive);
+
+		if (t_Event.type == EventType.MouseDrag || t_Event.type == EventType.mouseDrag)
+		{
+			if (!m_fShiftDown)
+			{
+				Vector2 t_v2Pos = v2GridPos(t_Event.mousePosition, p_sceneView);
+
+				if (t_v2Pos != m_v2PrevPos)
+				{
+					vGenerateCube(t_v2Pos);
+				}
+
+				m_v2PrevPos = t_v2Pos;
+
+				t_Event.Use();
+			}
+		}
+		if (t_Event.rawType == EventType.MouseUp && GUIUtility.hotControl != 0)
+		{
+			if (!m_fShiftDown)
+			{
+				GUIUtility.hotControl = 0;
+			}
+		}
 		if (t_Event.type == EventType.MouseDown || t_Event.type == EventType.mouseDown)
 		{
-			Debug.Log("Mouse down in scene view");
+			m_fShiftDown = t_Event.shift;
+
+			if (!t_Event.shift)
+			{
+				GUIUtility.hotControl = t_nControlID;
+				// Clamp mouse position to grid position
+				Vector2 t_v2Pos = v2GridPos(t_Event.mousePosition, p_sceneView);
+
+				if (t_v2Pos != m_v2PrevPos)
+				{
+					vGenerateCube(t_v2Pos);
+				}
+
+				m_v2PrevPos = t_v2Pos;
+			}
 		}
 	}
 	#region Private Methods
@@ -271,6 +319,27 @@ public class CMapEditor : EditorWindow
 		for (int t_i = 0; t_i < m_lstTex2dMap.Count; ++t_i)
 		{
 		}
+	}
+	private Vector2 v2GridPos(Vector2 p_v2MousePos, SceneView p_sceneView)
+	{
+		Camera t_camera = p_sceneView.camera;
+		Vector2 t_v2Pos = t_camera.ScreenToWorldPoint(new Vector3(p_v2MousePos.x, t_camera.pixelHeight - p_v2MousePos.y, 0));
+		Debug.Log("screen to world: " + t_v2Pos);
+		//t_v2Pos.z = 0;
+		//t_v2Pos.y *= -1;
+
+		t_v2Pos.x = Mathf.RoundToInt(t_v2Pos.x);
+		t_v2Pos.y = Mathf.RoundToInt(t_v2Pos.y);
+
+		return t_v2Pos;
+	}
+	private void vGenerateCube(Vector2 p_v2Pos)
+	{
+		float t_rChunkSize = (float)CChunkEditorGen.msc_nChunkSize;
+
+		Vector2 t_v2Chunk = new Vector2(Mathf.RoundToInt(p_v2Pos.x / t_rChunkSize), Mathf.RoundToInt(p_v2Pos.y / t_rChunkSize));
+
+		CChunkEditorGen.Instance.vAddTile(new CTile(), p_v2Pos);
 	}
 	#endregion
 }

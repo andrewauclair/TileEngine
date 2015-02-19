@@ -81,35 +81,14 @@ public class CWorldManager : MonoBehaviour
 				lstTiles.Add(new CTile(t_obj[t_i]));
 			}
 		}
-		List<int> t_aTestData = new List<int>();
-
-		t_Bytes = Resources.Load("JSON/testmap") as TextAsset;
-
-		if (t_Bytes == null)
+		for (int t_i = 0; t_i < transform.childCount; ++t_i)
 		{
-			Debug.Log("Can't find test map");
-		}
-		else
-		{
-			CByteStreamReader t_Reader = new CByteStreamReader(t_Bytes.bytes);
-			JSONObject t_obj = new JSONObject(t_Reader.strRead());
+			CChunk t_chunk = transform.GetChild(t_i).GetComponent<CChunk>();
 
-			for (int t_i = 0; t_i < t_obj.Count; ++t_i)
+			if (t_chunk != null)
 			{
-				t_aTestData.Add(Mathf.RoundToInt(t_obj[t_i].n));
+				m_aChunks.Add(t_chunk);
 			}
-		}
-
-		for (int t_i = 0; t_i < 1; ++t_i)
-		{
-			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			t_obj.transform.position = new Vector3(-(TileSize / 2.0f) + (ChunkWidth * t_i), -(TileSize / 2.0f), 0f);
-			t_obj.transform.parent = gameObject.transform;
-
-			CChunk t_chunk = t_obj.AddComponent<CChunk>();
-			t_chunk.vSetData(t_aTestData);
-			t_chunk.vGenerateMesh();
-			m_aChunks.Add(t_chunk);
 		}
     }
     void Start()

@@ -10,6 +10,7 @@ public class CChunk : MonoBehaviour
     #endregion
 
     #region Public Data
+	public Vector2 v2Position { get; set; }
     #endregion
 
     #region Private Data
@@ -41,7 +42,9 @@ public class CChunk : MonoBehaviour
     #region Public Methods
 	public void vSetData(List<int> p_aData)
 	{
-		m_aData = p_aData;
+		m_meshRenderer = GetComponent<MeshRenderer>();
+		m_meshFilter = GetComponent<MeshFilter>();
+		m_aData = new List<int>(p_aData);
 	}
 	public void vGenerateMesh()
 	{
@@ -50,9 +53,9 @@ public class CChunk : MonoBehaviour
 			return;
 		}
 
-		int t_xSize = CWorldManager.Instance.ChunkWidth;
-		int t_ySize = CWorldManager.Instance.ChunkHeight;
-		int t_nTileSize = CWorldManager.Instance.TileSize;
+		int t_xSize = 11;// CWorldManager.Instance.ChunkWidth;
+		int t_ySize = 11;// CWorldManager.Instance.ChunkHeight;
+		int t_nTileSize = 1;
 
 		int t_cTiles = t_xSize * t_ySize;
 		int t_cTris = t_cTiles * 2;
@@ -66,14 +69,12 @@ public class CChunk : MonoBehaviour
 		int t_iVert = 0;
 		int t_iTri = 0;
 		int t_iUV = 0;
-		int t_nTextureWidth = CWorldManager.Instance.AtlasMat.mainTexture.width;
-		int t_nTextureHeight = CWorldManager.Instance.AtlasMat.mainTexture.height;
-
+		
 		for (int t_y = 0; t_y < t_ySize; ++t_y)
 		{
 			for (int t_x = 0; t_x < t_xSize; ++t_x)
 			{
-				if (t_y == 4 && t_x == 4)
+				if (m_aData[(t_y * t_xSize) + t_x] == -1)
 				{
 					continue;
 				}
@@ -87,7 +88,7 @@ public class CChunk : MonoBehaviour
 				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
 
-				CTile t_Tile = CWorldManager.Instance.lstTiles[m_aData[(t_y * t_xSize) + t_x]];
+				CTile t_Tile = CChunkEditorGen.Instance.lstTiles[m_aData[(t_y * t_xSize) + t_x]];
 
 				t_aUVs[t_iUV++] = t_Tile.UV4;
 				t_aUVs[t_iUV++] = t_Tile.UV2;
@@ -112,7 +113,7 @@ public class CChunk : MonoBehaviour
 		m_mesh.RecalculateNormals();
 		
 		m_meshFilter.mesh = m_mesh;
-		m_meshRenderer.material = CWorldManager.Instance.AtlasMat;
+		m_meshRenderer.material = CChunkEditorGen.Instance.AtlasMat;
 
 		m_fMeshGenerated = true;
 	}
@@ -123,8 +124,18 @@ public class CChunk : MonoBehaviour
 			return;
 		}
 
-		m_mesh.Clear();
+		m_fMeshGenerated = false;
+
+		DestroyImmediate(m_mesh);
 		m_mesh = null;
+	}
+	public void vSetTile(Vector2 p_v2Pos, CTile p_Tile)
+	{
+		//Debug.Log("size: " + m_aData.Count + " index: " + ((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x));
+
+		m_aData[(int)((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x)] = p_Tile.Tile;
+		vDisposeMesh();
+		vGenerateMesh();
 	}
     #endregion
 

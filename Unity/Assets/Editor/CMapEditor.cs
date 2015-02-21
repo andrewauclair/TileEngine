@@ -49,13 +49,12 @@ public class CMapEditor : EditorWindow
 			m_goPreview.renderer.material = CChunkEditorGen.Instance.AtlasMat;
 
 			vUpdatePreviewMesh();
-			MeshFilter t_meshFilter = m_goPreview.GetComponent<MeshFilter>();
-			foreach (Vector2 t_v2UV in t_meshFilter.sharedMesh.uv)
-			{
-				Debug.Log("uv: " + t_v2UV.ToString("G4"));
-			}
+			
 			// We don't want the user to select this object, so hide it
-			//m_goPreview.hideFlags = HideFlags.HideAndDontSave;
+			m_goPreview.hideFlags = HideFlags.HideAndDontSave;
+
+			// We default to not editing the map, so hide the preview
+			m_goPreview.gameObject.SetActive(false);
 		}
 
 		vRefreshTilesetList();
@@ -140,10 +139,6 @@ public class CMapEditor : EditorWindow
 		Rect t_rectLast = GUILayoutUtility.GetLastRect();
 		m_v2TexturePos = new Vector2(t_rectLast.x, t_rectLast.y);
 		vCheckInput();
-
-		if (Event.current.type == EventType.MouseMove)
-		{
-		}
 	}
 	public void SceneGUI(SceneView p_sceneView)
 	{
@@ -157,7 +152,12 @@ public class CMapEditor : EditorWindow
 		Tools.current = Tool.View;
 
 		Event t_Event = Event.current;
-		
+
+		if (t_Event.type == EventType.keyDown || t_Event.type == EventType.KeyDown)
+		{
+			Debug.Log("key down: " + t_Event.keyCode);
+		}
+
 		Vector2 t_v2Pos = v2GridPos(t_Event.mousePosition, p_sceneView.camera);
 
 		if (t_Event.type == EventType.MouseMove || t_Event.type == EventType.mouseMove)
@@ -168,7 +168,7 @@ public class CMapEditor : EditorWindow
 		int t_nControlID = GUIUtility.GetControlID(GetHashCode(), FocusType.Passive);
 
 		// Drag to add more of the current tile
-		if (t_Event.type == EventType.MouseDrag || t_Event.type == EventType.mouseDrag)
+		if ((t_Event.type == EventType.MouseDrag || t_Event.type == EventType.mouseDrag) && t_Event.button == 0 && !m_fShiftDown)
 		{
 			if (!m_fShiftDown)
 			{
@@ -183,7 +183,7 @@ public class CMapEditor : EditorWindow
 			}
 		}
 		// Drag to delete more tiles
-		if (t_Event.type == EventType.MouseDrag && t_Event.button == 1 && !m_fShiftDown)
+		if ((t_Event.type == EventType.MouseDrag || t_Event.type == EventType.mouseDrag) && t_Event.button == 1 && !m_fShiftDown)
 		{
 			if (t_v2Pos != m_v2PrevPos)
 			{
@@ -223,7 +223,7 @@ public class CMapEditor : EditorWindow
 		if ((t_Event.type == EventType.MouseDown || t_Event.type == EventType.mouseDown) && t_Event.button == 1)
 		{
 			m_fShiftDown = t_Event.shift;
-
+			Debug.Log("Delete");
 			if (!t_Event.shift)
 			{
 				GUIUtility.hotControl = t_nControlID;

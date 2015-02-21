@@ -18,7 +18,7 @@ public class CChunk : MonoBehaviour
 	private MeshFilter m_meshFilter = null;
 	private Mesh m_mesh = null;
 
-	private List<int> m_aData = null;
+	private List<int> m_lstData = null;
 
 	private bool m_fMeshGenerated = false;
     #endregion
@@ -42,6 +42,18 @@ public class CChunk : MonoBehaviour
 
 		Gizmos.color = Color.white;
 		Gizmos.DrawWireCube(transform.position, new Vector3(t_nChunkSize, t_nChunkSize, t_nChunkSize));
+
+		float t_rHalfChunk = t_nChunkSize / 2.0f;
+
+		Vector3 t_v3TopLeft = new Vector3(transform.position.x - t_rHalfChunk, transform.position.y + t_rHalfChunk, 0f);
+		Vector3 t_v3TopRight = new Vector3(transform.position.x + t_rHalfChunk, transform.position.y + t_rHalfChunk, 0f);
+		Vector3 t_v3BottomLeft = new Vector3(transform.position.x - t_rHalfChunk, transform.position.y - t_rHalfChunk, 0f);
+		Vector3 t_v3BottomRight = new Vector3(transform.position.x + t_rHalfChunk, transform.position.y - t_rHalfChunk, 0f);
+
+		Gizmos.DrawLine(t_v3TopLeft, t_v3TopRight);
+		Gizmos.DrawLine(t_v3TopRight, t_v3BottomRight);
+		Gizmos.DrawLine(t_v3BottomRight, t_v3BottomLeft);
+		Gizmos.DrawLine(t_v3BottomLeft, t_v3TopLeft);
 	}
 #endif
     #endregion
@@ -51,11 +63,11 @@ public class CChunk : MonoBehaviour
 	{
 		m_meshRenderer = GetComponent<MeshRenderer>();
 		m_meshFilter = GetComponent<MeshFilter>();
-		m_aData = new List<int>(p_aData);
+		m_lstData = new List<int>(p_aData);
 	}
 	public void vGenerateMesh()
 	{
-		if (m_fMeshGenerated || m_aData == null)
+		if (m_fMeshGenerated || m_lstData == null || fIsEmpty())
 		{
 			return;
 		}
@@ -81,7 +93,7 @@ public class CChunk : MonoBehaviour
 		{
 			for (int t_x = 0; t_x < t_xSize; ++t_x)
 			{
-				if (m_aData[(t_y * t_xSize) + t_x] == -1)
+				if (m_lstData[(t_y * t_xSize) + t_x] == -1)
 				{
 					continue;
 				}
@@ -96,7 +108,7 @@ public class CChunk : MonoBehaviour
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
 
 #if UNITY_EDITOR
-				CTile t_Tile = CChunkEditorGen.Instance.lstTiles[m_aData[(t_y * t_xSize) + t_x]];
+				CTile t_Tile = CChunkEditorGen.Instance.lstTiles[m_lstData[(t_y * t_xSize) + t_x]];
 
 				t_aUVs[t_iUV++] = t_Tile.UV4;
 				t_aUVs[t_iUV++] = t_Tile.UV2;
@@ -142,10 +154,21 @@ public class CChunk : MonoBehaviour
 	{
 		//Debug.Log("size: " + m_aData.Count + " index: " + ((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x));
 #if UNITY_EDITOR
-		m_aData[(int)((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x)] = p_Tile.Tile;
+		m_lstData[(int)((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x)] = p_Tile.Tile;
 #endif
 		vDisposeMesh();
 		vGenerateMesh();
+	}
+	public bool fIsEmpty()
+	{
+		for (int t_i = 0; t_i < m_lstData.Count; ++t_i)
+		{
+			if (m_lstData[t_i] != -1)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
     #endregion
 

@@ -94,7 +94,7 @@ public class CChunkEditorGen : MonoBehaviour
 		}
 
 		// If we didn't find the chunk then this is the first tile for it and we need to create the chunk
-		if (t_chunk == null)
+		if (t_chunk == null && p_Tile.Tile != -1)
 		{
 			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			t_obj.transform.position = t_v2Chunk * msc_nChunkSize;
@@ -106,6 +106,11 @@ public class CChunkEditorGen : MonoBehaviour
 			t_chunk.v2Position = t_v2Chunk;
 
 			m_lstChunks.Add(t_chunk);
+		}
+		else if (t_chunk == null && p_Tile.Tile == -1)
+		{
+			// we're deleting a tile from an empty chunk, just leave
+			return;
 		}
 
 		Vector2 t_v2TilePos = Vector2.zero;
@@ -121,6 +126,12 @@ public class CChunkEditorGen : MonoBehaviour
 		int t_nTile = Mathf.RoundToInt((t_v2Diff.y * msc_nChunkSize) + t_v2Diff.x);
 		
 		t_chunk.vSetTile(t_v2Diff, p_Tile);
+
+		if (t_chunk.fIsEmpty())
+		{
+			m_lstChunks.Remove(t_chunk);
+			DestroyImmediate(t_chunk.gameObject);
+		}
 	}
     #endregion
 

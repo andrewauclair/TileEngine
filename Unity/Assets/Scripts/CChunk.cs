@@ -21,8 +21,6 @@ public class CChunk : MonoBehaviour
 	private List<int> m_aData = null;
 
 	private bool m_fMeshGenerated = false;
-
-	private int m_nPixelSize = 32;
     #endregion
 
     #region Unity Methods

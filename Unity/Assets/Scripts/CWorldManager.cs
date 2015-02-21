@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine.EventSystems;
 
 public class CWorldManager : MonoBehaviour
 {
@@ -35,7 +36,7 @@ public class CWorldManager : MonoBehaviour
     #endregion
 
     #region Private Data
-	List<CChunk> m_aChunks = new List<CChunk>();
+	List<CChunk> m_lstChunks = new List<CChunk>();
 	
 	private bool m_fLeftPressed = false;
 	private bool m_fRightPressed = false;
@@ -87,7 +88,7 @@ public class CWorldManager : MonoBehaviour
 
 			if (t_chunk != null)
 			{
-				m_aChunks.Add(t_chunk);
+				m_lstChunks.Add(t_chunk);
 			}
 		}
     }
@@ -142,7 +143,7 @@ public class CWorldManager : MonoBehaviour
 		{
 			Vector3 t_v3Offset = Vector3.zero;
 
-			m_rTime += Time.deltaTime;
+			m_rTime += Time.smoothDeltaTime;
 			
 			Vector3 t_v3Pos = Vector3.Lerp(m_v3Start, m_v3Target, Mathf.Min(m_rTime / MoveTime, 1.0f));
 
@@ -174,9 +175,9 @@ public class CWorldManager : MonoBehaviour
 	}
 	private void vMoveChunks(Vector3 p_v3Offset)
 	{
-		for (int t_i = 0; t_i < m_aChunks.Count; ++t_i)
+		for (int t_i = 0; t_i < m_lstChunks.Count; ++t_i)
 		{
-			m_aChunks[t_i].transform.position += p_v3Offset;
+			m_lstChunks[t_i].transform.position += p_v3Offset;
 		}
 	}
 	#endregion

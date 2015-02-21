@@ -55,10 +55,10 @@ public class CEditorTools : MonoBehaviour
 
 						t_tile.Tile = t_nTile;
 						
-						t_tile.UV1 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, t_y * t_rUVHeight);
-						t_tile.UV2 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);
-						t_tile.UV3 = new Vector2(t_x * t_rUVWidth, t_y * t_rUVHeight);
-						t_tile.UV4 = new Vector2(t_x * t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);
+						t_tile.UV1 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, t_y * t_rUVHeight);					// (1,0)
+						t_tile.UV2 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);	// (1,1)
+						t_tile.UV3 = new Vector2(t_x * t_rUVWidth, t_y * t_rUVHeight);									// (0,0)
+						t_tile.UV4 = new Vector2(t_x * t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);					// (0,1)
 						
 						t_lstTiles.Add(t_tile);
 					}

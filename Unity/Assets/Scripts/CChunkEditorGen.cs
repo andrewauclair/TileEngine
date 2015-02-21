@@ -22,7 +22,6 @@ public class CChunkEditorGen : MonoBehaviour
     #endregion
 
     #region Private Data
-	private Vector2 m_v2PrevMousePos = Vector2.zero;
 	private List<CChunk> m_lstChunks = new List<CChunk>();
 	private List<int> m_aTestData = new List<int>();
     #endregion
@@ -30,7 +29,6 @@ public class CChunkEditorGen : MonoBehaviour
     #region Unity Methods
     void OnEnable()
     {
-		Debug.Log("Awake");
 		Instance = this;
 
 		// load json file of uvs
@@ -60,11 +58,18 @@ public class CChunkEditorGen : MonoBehaviour
 				m_aTestData.Add(-1);
 			}
 		}
+
+		// fill our list of chunks with any chunks that might be children of this object
+		for (int t_i = 0; t_i < transform.childCount; ++t_i)
+		{
+			CChunk t_chunk = transform.GetChild(t_i).GetComponent<CChunk>();
+
+			if (t_chunk != null)
+			{
+				m_lstChunks.Add(t_chunk);
+			}
+		}
     }
-	void Start()
-    {
-		Debug.Log("Start");
-	}
 	void Update()
     {
     }
@@ -100,8 +105,6 @@ public class CChunkEditorGen : MonoBehaviour
 			t_chunk.vGenerateMesh();
 			t_chunk.v2Position = t_v2Chunk;
 
-			//t_chunk.vSetTile(Vector2.zero, p_Tile);
-			//t_chunk.vSetTile(new Vector2(msc_nChunkSize - 1, msc_nChunkSize - 1), p_Tile);
 			m_lstChunks.Add(t_chunk);
 		}
 

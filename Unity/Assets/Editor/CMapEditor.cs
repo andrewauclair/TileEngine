@@ -197,6 +197,8 @@ public class CMapEditor : EditorWindow
 		// Stop taking control of the GUI input
 		if (t_Event.rawType == EventType.MouseUp && GUIUtility.hotControl != 0)
 		{
+			m_goPreview.SetActive(true);
+
 			if (!m_fShiftDown)
 			{
 				GUIUtility.hotControl = 0;
@@ -222,8 +224,10 @@ public class CMapEditor : EditorWindow
 		// Delete a tile in this position
 		if ((t_Event.type == EventType.MouseDown || t_Event.type == EventType.mouseDown) && t_Event.button == 1)
 		{
+			m_goPreview.SetActive(false);
+
 			m_fShiftDown = t_Event.shift;
-			Debug.Log("Delete");
+
 			if (!t_Event.shift)
 			{
 				GUIUtility.hotControl = t_nControlID;

@@ -18,7 +18,8 @@ public class CChunk : MonoBehaviour
 	private MeshFilter m_meshFilter = null;
 	private Mesh m_mesh = null;
 
-	private List<int> m_lstData = null;
+	[SerializeField]
+	private List<int> m_lstData = new List<int>();
 
 	private bool m_fMeshGenerated = false;
     #endregion
@@ -30,7 +31,8 @@ public class CChunk : MonoBehaviour
 		m_meshFilter = GetComponent<MeshFilter>();
     }
     void Start()
-    {	
+    {
+		Debug.Log("null: " + m_lstData == null);
 	}
 	void Update()
     {
@@ -41,8 +43,7 @@ public class CChunk : MonoBehaviour
 		int t_nChunkSize = CChunkEditorGen.msc_nChunkSize;
 
 		Gizmos.color = Color.white;
-		Gizmos.DrawWireCube(transform.position, new Vector3(t_nChunkSize, t_nChunkSize, t_nChunkSize));
-
+		
 		float t_rHalfChunk = t_nChunkSize / 2.0f;
 
 		Vector3 t_v3TopLeft = new Vector3(transform.position.x - t_rHalfChunk, transform.position.y + t_rHalfChunk, 0f);
@@ -70,6 +71,16 @@ public class CChunk : MonoBehaviour
 		if (m_fMeshGenerated || m_lstData == null || fIsEmpty())
 		{
 			return;
+		}
+
+		if (m_meshRenderer == null)
+		{
+			m_meshRenderer = GetComponent<MeshRenderer>();
+		}
+
+		if (m_meshFilter == null)
+		{
+			m_meshFilter = GetComponent<MeshFilter>();
 		}
 
 		int t_xSize = 11;// CWorldManager.Instance.ChunkWidth;
@@ -152,7 +163,8 @@ public class CChunk : MonoBehaviour
 	}
 	public void vSetTile(Vector2 p_v2Pos, CTile p_Tile)
 	{
-		//Debug.Log("size: " + m_aData.Count + " index: " + ((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x));
+		Debug.Log("name: " + gameObject.name);
+		Debug.Log(m_lstData == null); 
 #if UNITY_EDITOR
 		m_lstData[(int)((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x)] = p_Tile.Tile;
 #endif

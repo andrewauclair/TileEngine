@@ -99,6 +99,7 @@ public class CChunkEditorGen : MonoBehaviour
 			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			t_obj.transform.position = t_v2Chunk * msc_nChunkSize;
 			t_obj.transform.parent = gameObject.transform;
+			t_obj.name = "Chunk (" + t_v2Chunk.x + ", " + t_v2Chunk.y + ")";
 
 			t_chunk = t_obj.AddComponent<CChunk>();
 			t_chunk.vSetData(m_aTestData);

@@ -7,17 +7,22 @@ using UnityEngine;
 public class CMapEditor : EditorWindow
 {
 	#region Static Data
+	public static CMapEditor Instance = null;
+
 	// Tileset size options, defaults to 32
 	private static int[] ms_aTileSizeValues = { 16, 32, 64 };
 	private static string[] ms_aTileSizeDisplays = { "16", "32", "64" };
 	#endregion
 
+	#region Private Data
 	private Texture2D m_tex2dTileset = null;
 
 	private List<List<int>> m_lstTileNums = new List<List<int>>();
 
 	private string[] m_aStrTilesets = new string[0];
-	
+	private CLayer[] m_aLayers = new CLayer[0];
+	private string[] m_aStrLayers = new string[0];
+
 	private Vector2 m_v2PrevPos = Vector2.zero;
 	private Vector2 m_v2ScrollPos = Vector2.zero;
 	private Vector2 m_v2TexturePos = Vector2.zero;
@@ -25,11 +30,14 @@ public class CMapEditor : EditorWindow
 	private int m_nTileSize = 32;
 	private int m_nSelectedTile = 0;
 	private int m_nSelectedTileset = 0;
+	private int m_nSelectedLayer = 0;
+	private int m_nLayerMask = -1;
 
 	private bool m_fEnabled = false;
 	private bool m_fShiftDown = false;
 
 	private GameObject m_goPreview = null;
+	#endregion
 
 	[MenuItem(CEditorTools.msc_strToolsName + "/Map Editor")]
 	private static void Init()
@@ -39,8 +47,18 @@ public class CMapEditor : EditorWindow
 
 	public CMapEditor()
 	{
+		Instance = this;
+
+		Debug.Log("Create Map Editor Window");
+
 		SceneView.onSceneGUIDelegate += SceneGUI;
 		wantsMouseMove = true;
+
+		vRefreshTilesetList();
+		vRefreshLayerList();
+		vGenerateTilesetTexture();
+
+		CChunkEditorGen.Instance.vSetTileset(m_aStrTilesets[0]);
 
 		if (m_goPreview == null)
 		{
@@ -56,9 +74,6 @@ public class CMapEditor : EditorWindow
 			// We default to not editing the map, so hide the preview
 			m_goPreview.gameObject.SetActive(false);
 		}
-
-		vRefreshTilesetList();
-		vGenerateTilesetTexture();
 	}
 	public void OnDestroy()
 	{
@@ -73,6 +88,7 @@ public class CMapEditor : EditorWindow
 	void Update()
 	{
 		vRefreshTilesetList();
+		vRefreshLayerList();
 	}
 	void OnGUI()
 	{
@@ -104,14 +120,23 @@ public class CMapEditor : EditorWindow
 
 		int t_nPrevTileset = m_nSelectedTileset;
 		int t_nPrevTileSize = m_nTileSize;
+		int t_nPrevLayer = m_nSelectedLayer;
 
 		m_nSelectedTileset = EditorGUILayout.Popup("Tileset", m_nSelectedTileset, m_aStrTilesets);
 		m_nTileSize = EditorGUILayout.IntPopup("Tile Size", m_nTileSize, ms_aTileSizeDisplays, ms_aTileSizeValues);
-
-
+		m_nLayerMask = EditorGUILayout.MaskField("Display Layers", m_nLayerMask, m_aStrLayers);
+		m_nSelectedLayer = EditorGUILayout.Popup("Edit Layer", m_nSelectedLayer, m_aStrLayers);
+		
 		if (m_nSelectedTileset != t_nPrevTileset)
 		{
+			Debug.Log("Tileset selection changed.");
+			m_nSelectedTile = 0;
+			
+			// load the material for this tileset
+			CChunkEditorGen.Instance.vSetTileset(m_aStrTilesets[m_nSelectedTileset]);
+
 			// update the tileset texture
+			vGenerateTilesetTexture();
 			vUpdatePreviewMesh();
 		}
 
@@ -124,18 +149,27 @@ public class CMapEditor : EditorWindow
 		if (m_tex2dTileset != null && position.width + m_nTileSize < m_tex2dTileset.width)
 		{
 			// update the tileset texture
-			vUpdatePreviewMesh();
+			vUpdateTilesetTexture();
 		}
 
-		m_v2ScrollPos = EditorGUILayout.BeginScrollView(m_v2ScrollPos);
+		EditorGUILayout.BeginHorizontal();
+
+		int t_nScrollWidth = (m_tex2dTileset != null) ? m_tex2dTileset.width : 0;
+		int t_nScrollHeight = (m_tex2dTileset != null) ? m_tex2dTileset.height : 0;
+
+		m_v2ScrollPos = EditorGUILayout.BeginScrollView(m_v2ScrollPos, GUILayout.Height(t_nScrollHeight), GUILayout.Width(t_nScrollWidth));
 
 		if (m_tex2dTileset != null)
 		{
-			EditorGUI.DrawTextureTransparent(new Rect(0, 0, m_tex2dTileset.width, m_tex2dTileset.height), m_tex2dTileset);
+			Rect t_rect = GUILayoutUtility.GetRect(m_tex2dTileset.width, m_tex2dTileset.height);
+
+			EditorGUI.DrawTextureTransparent(t_rect, m_tex2dTileset);
 		}
 
-		EditorGUILayout.EndScrollView(); 
-		
+		EditorGUILayout.EndScrollView();
+
+		EditorGUILayout.EndHorizontal();
+
 		Rect t_rectLast = GUILayoutUtility.GetLastRect();
 		m_v2TexturePos = new Vector2(t_rectLast.x, t_rectLast.y);
 		vCheckInput();
@@ -162,7 +196,7 @@ public class CMapEditor : EditorWindow
 
 		if (t_Event.type == EventType.MouseMove || t_Event.type == EventType.mouseMove)
 		{
-			m_goPreview.transform.position = new Vector3(t_v2Pos.x, t_v2Pos.y, 0);
+			m_goPreview.transform.position = new Vector3(t_v2Pos.x, t_v2Pos.y, (-.5f * m_nSelectedLayer) - .25f);
 		}
 
 		int t_nControlID = GUIUtility.GetControlID(GetHashCode(), FocusType.Passive);
@@ -174,7 +208,7 @@ public class CMapEditor : EditorWindow
 			{
 				if (t_v2Pos != m_v2PrevPos)
 				{
-					vGenerateCube(t_v2Pos);
+					vAddTile(t_v2Pos);
 				}
 
 				m_v2PrevPos = t_v2Pos;
@@ -187,7 +221,7 @@ public class CMapEditor : EditorWindow
 		{
 			if (t_v2Pos != m_v2PrevPos)
 			{
-				vDeleteCube(t_v2Pos);
+				vRemoveTile(t_v2Pos);
 			}
 
 			m_v2PrevPos = t_v2Pos;
@@ -212,12 +246,7 @@ public class CMapEditor : EditorWindow
 			if (!t_Event.shift)
 			{
 				GUIUtility.hotControl = t_nControlID;
-				// Clamp mouse position to grid position
-				if (t_v2Pos != m_v2PrevPos)
-				{
-					vGenerateCube(t_v2Pos);
-				}
-
+				vAddTile(t_v2Pos);
 				m_v2PrevPos = t_v2Pos;
 			}
 		}
@@ -231,12 +260,7 @@ public class CMapEditor : EditorWindow
 			if (!t_Event.shift)
 			{
 				GUIUtility.hotControl = t_nControlID;
-
-				if (t_v2Pos != m_v2PrevPos)
-				{
-					vDeleteCube(t_v2Pos);
-				}
-
+				vRemoveTile(t_v2Pos);
 				m_v2PrevPos = t_v2Pos;
 			}
 		}
@@ -260,6 +284,22 @@ public class CMapEditor : EditorWindow
 			Array.Copy(t_aStrTilesets, m_aStrTilesets, t_aStrTilesets.Length);
 		}
 	}
+	private void vRefreshLayerList()
+	{
+		CLayer[] t_aLayers = CChunkEditorGen.Instance.lstLayers.ToArray();
+
+		if (t_aLayers.Length != m_aLayers.Length)
+		{
+			Array.Resize<CLayer>(ref m_aLayers, t_aLayers.Length);
+			Array.Resize<string>(ref m_aStrLayers, t_aLayers.Length);
+			Array.Copy(t_aLayers, m_aLayers, t_aLayers.Length);
+
+			for (int t_i = 0; t_i < m_aStrLayers.Length; ++t_i)
+			{
+				m_aStrLayers[t_i] = t_aLayers[t_i].m_strName;
+			}
+		}
+	}
 	private void vGenerateTilesetTexture()
 	{
 		// Find the texture that goes along with the tileset
@@ -268,6 +308,12 @@ public class CMapEditor : EditorWindow
 
 		if (t_texture.LoadImage(t_aBytes))
 		{
+			if (m_tex2dTileset != null)
+			{
+				DestroyImmediate(m_tex2dTileset);
+				m_tex2dTileset = null;
+			}
+
 			m_tex2dTileset = t_texture;
 			m_tex2dTileset.hideFlags = HideFlags.HideAndDontSave;
 		}
@@ -311,17 +357,17 @@ public class CMapEditor : EditorWindow
 
 		return t_v2Pos;
 	}
-	private void vGenerateCube(Vector2 p_v2Pos)
+	private void vAddTile(Vector2 p_v2Pos)
 	{
 		CTile t_tile = new CTile();
 		t_tile.Tile = m_nSelectedTile;
-		CChunkEditorGen.Instance.vAddTile(t_tile, p_v2Pos);
+		CChunkEditorGen.Instance.vAddTile(t_tile, p_v2Pos, m_nSelectedLayer);
 	}
-	private void vDeleteCube(Vector2 p_v2Pos)
+	private void vRemoveTile(Vector2 p_v2Pos)
 	{
 		CTile t_tile = new CTile();
 		t_tile.Tile = -1;
-		CChunkEditorGen.Instance.vAddTile(t_tile, p_v2Pos);
+		CChunkEditorGen.Instance.vAddTile(t_tile, p_v2Pos, m_nSelectedLayer);
 	}
 	private void vUpdatePreviewMesh()
 	{
@@ -351,6 +397,49 @@ public class CMapEditor : EditorWindow
 
 		t_meshFilter.sharedMesh.uv = t_aUVs;
 		t_meshFilter.sharedMesh.RecalculateNormals();
+
+		m_goPreview.renderer.material = CChunkEditorGen.Instance.AtlasMat;
+	}
+	private void vUpdateTilesetTexture()
+	{
+		int t_nTexWidth = m_tex2dTileset.width;
+		int t_nTexHeight = m_tex2dTileset.height;
+		
+		int t_nTileWidthOld = t_nTexWidth / m_nTileSize;
+		int t_nTileHeightOld = t_nTexHeight / m_nTileSize;
+		int t_nTiles = (t_nTexWidth / m_nTileSize) * (t_nTexHeight / m_nTileSize);
+
+		int t_nEditorWidth = Mathf.RoundToInt(position.width);
+		
+		int t_nTileWidth = Mathf.FloorToInt(t_nEditorWidth / m_nTileSize) - 1;
+		int t_nTileHeight = t_nTiles / t_nTileWidth;
+		
+		Debug.Log("tile width: " + t_nTileWidth);
+		Debug.Log("tile height: " + t_nTileHeight);
+
+		Texture2D t_texNew = new Texture2D(t_nTileWidth * m_nTileSize, t_nTileHeight * m_nTileSize);
+
+		// copy the tile data from the old texture to the new one
+		for (int t_iTile = 0; t_iTile < t_nTiles; ++t_iTile)
+		{
+			int t_nOldY = t_iTile / t_nTileWidthOld;
+			int t_nOldX = t_iTile - (t_nTileWidthOld * t_nOldY);
+
+			int t_nNewY = t_iTile / t_nTileWidth;
+			int t_nNewX = t_iTile - (t_nTileWidth * t_nNewY);
+
+			Color[] t_aColors = m_tex2dTileset.GetPixels(t_nOldX * m_nTileSize, t_nOldY * m_nTileSize, m_nTileSize, m_nTileSize);
+
+			t_texNew.SetPixels(t_nNewX * m_nTileSize, t_nNewY * m_nTileSize, m_nTileSize, m_nTileSize, t_aColors);
+		}
+
+		t_texNew.Apply();
+
+		DestroyImmediate(m_tex2dTileset);
+		m_tex2dTileset = null;
+
+		// set to new texture
+		m_tex2dTileset = t_texNew;
 	}
 	#endregion
 }

@@ -11,6 +11,7 @@ public class CChunk : MonoBehaviour
 
     #region Public Data
 	public Vector2 v2Position { get; set; }
+	public int nLayer { get; set; }
     #endregion
 
     #region Private Data
@@ -60,11 +61,11 @@ public class CChunk : MonoBehaviour
     #endregion
 
     #region Public Methods
-	public void vSetData(List<int> p_aData)
+	public void vSetData(List<int> p_lstData)
 	{
 		m_meshRenderer = GetComponent<MeshRenderer>();
 		m_meshFilter = GetComponent<MeshFilter>();
-		m_lstData = new List<int>(p_aData);
+		m_lstData = new List<int>(p_lstData);
 	}
 	public void vGenerateMesh()
 	{
@@ -113,10 +114,10 @@ public class CChunk : MonoBehaviour
 				float t_ry = -((t_ySize * t_nTileSize) / 2.0f) + (t_y * t_nTileSize) + (t_nTileSize / 2.0f);
 
 				// create the 4 vertices for this tile
-				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0); 
-				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0);
-				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
-				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0);
+				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0f);
 
 #if UNITY_EDITOR
 				CTile t_Tile = CChunkEditorGen.Instance.lstTiles[m_lstData[(t_y * t_xSize) + t_x]];
@@ -163,8 +164,6 @@ public class CChunk : MonoBehaviour
 	}
 	public void vSetTile(Vector2 p_v2Pos, CTile p_Tile)
 	{
-		Debug.Log("name: " + gameObject.name);
-		Debug.Log(m_lstData == null); 
 #if UNITY_EDITOR
 		m_lstData[(int)((p_v2Pos.y * CChunkEditorGen.msc_nChunkSize) + p_v2Pos.x)] = p_Tile.Tile;
 #endif

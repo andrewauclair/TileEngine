@@ -34,12 +34,16 @@ public class CEditorTools : MonoBehaviour
 				// assume tile of 32px
 				int t_nWidth = t_texture.width;
 				int t_nHeight = t_texture.height;
+				Debug.Log("width: " + t_nWidth);
+				Debug.Log("height: " + t_nHeight);
 
 				int t_nTilesWidth = t_nWidth / 32;
 				int t_nTilesHeight = t_nHeight / 32;
 
 				float t_rUVWidth = 32 / (float)t_nWidth;
 				float t_rUVHeight = 32 / (float)t_nHeight;
+				Debug.Log("uv width: " + t_rUVWidth);
+				Debug.Log("uv height: " + t_rUVHeight);
 
 				JSONObject t_JSON = new JSONObject();
 

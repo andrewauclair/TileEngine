@@ -73,6 +73,8 @@ public class CEditorTools : MonoBehaviour
 						return p_t1.Tile.CompareTo(p_t2.Tile);
 					});
 
+				Debug.Log("tiles: " + t_lstTiles.Count);
+
 				foreach (CTile t_Tile in t_lstTiles)
 				{
 					t_JSON.Add(t_Tile.ToJSON());

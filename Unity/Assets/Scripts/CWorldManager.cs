@@ -17,7 +17,28 @@ public class CWorldManager : MonoBehaviour
 	}
 
     #region Static Data
-	public static CWorldManager Instance = null;
+	public static CWorldManager Instance
+	{
+		get
+		{
+			if (m_Instance)
+			{
+				return m_Instance;
+			}
+
+			m_Instance = null;
+			m_Instance = FindObjectOfType<CWorldManager>();
+
+			if (m_Instance)
+			{
+				return m_Instance;
+			}
+
+			Debug.LogError("No instance of CWorldManager found.");
+			return null;
+		}
+	}
+	protected static CWorldManager m_Instance = null;
     #endregion
 
     #region Public Data
@@ -36,7 +57,8 @@ public class CWorldManager : MonoBehaviour
     #endregion
 
     #region Private Data
-	List<CChunk> m_lstChunks = new List<CChunk>();
+	[HideInInspector]
+	public List<CChunk> m_lstChunks = new List<CChunk>();
 	
 	private bool m_fLeftPressed = false;
 	private bool m_fRightPressed = false;
@@ -57,7 +79,7 @@ public class CWorldManager : MonoBehaviour
     #region Unity Methods
     void Awake()
     {
-		Instance = this;
+		m_Instance = GetComponent<CWorldManager>();
 
 		if (ChunkWidth <= 0 || ChunkHeight <= 0)
 		{
@@ -82,15 +104,15 @@ public class CWorldManager : MonoBehaviour
 				lstTiles.Add(new CTile(t_obj[t_i]));
 			}
 		}
-		for (int t_i = 0; t_i < transform.childCount; ++t_i)
-		{
-			CChunk t_chunk = transform.GetChild(t_i).GetComponent<CChunk>();
+		//for (int t_i = 0; t_i < transform.childCount; ++t_i)
+		//{
+		//    CChunk t_chunk = transform.GetChild(t_i).GetComponent<CChunk>();
 
-			if (t_chunk != null)
-			{
-				m_lstChunks.Add(t_chunk);
-			}
-		}
+		//    if (t_chunk != null)
+		//    {
+		//        m_lstChunks.Add(t_chunk);
+		//    }
+		//}
     }
     void Start()
     {	

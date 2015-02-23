@@ -33,7 +33,7 @@ public class CChunk : MonoBehaviour
     }
     void Start()
     {
-		Debug.Log("null: " + m_lstData == null);
+		CWorldManager.Instance.m_lstChunks.Add(this);
 	}
 	void Update()
     {

@@ -1,0 +1,26 @@
+Unity 3D Smutty-Nose Tile Engine
+
+Editor Tasks
+- Player layer functionality
+- Collision layer and functionality
+- Map Editor disallow tiles on player and collision layers or certain layers, m_fTilesAllow in CLayer
++ Fix scrolling for tileset texture
++ Fix tileset texture resizing issue
+- make display layers mask actually work
+- Layer object in hierarchy
+- outline on preview object in scene
+- selection highlight on tileset texture
+- multiple tile selection
+- object mode, create a separate mesh of a single object. Will later be used to alpha out the object that is front of a player, possible feature.
+- auto tiles
+- shadows
+- paint bucket
+- brush sizes?
+- randomizer? uses multiple tile selection and places a random one every time a new tile is added in a location
+
+- isometric?
+- usability in side scroller
+
+Game Tasks
+- Implement Collision, generate box colliders in editor chunk gen?
+- Map transfer, each map is a separate scene

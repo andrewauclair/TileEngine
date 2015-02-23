@@ -48,6 +48,7 @@ public class CChunkEditorGen : MonoBehaviour
     #endregion
 
     #region Private Data
+	private List<GameObject> m_lstLayers = new List<GameObject>();
 	private List<CChunk> m_lstChunks = new List<CChunk>();
 	private List<int> m_aTestData = new List<int>();
     #endregion
@@ -65,6 +66,23 @@ public class CChunkEditorGen : MonoBehaviour
 			{
 				m_aTestData.Add(-1);
 			}
+		}
+
+		m_lstLayers.Clear();
+
+		for (int t_i = 0; t_i < lstLayers.Count; ++t_i)
+		{
+			GameObject t_goLayer = GameObject.Find(lstLayers[t_i].m_strName);
+
+			if (t_goLayer == null)
+			{
+				t_goLayer = new GameObject();
+				t_goLayer.name = lstLayers[t_i].m_strName;
+				t_goLayer.transform.position = Vector3.zero;
+				t_goLayer.transform.parent = gameObject.transform;
+			}
+
+			m_lstLayers.Add(t_goLayer);
 		}
 
 		// fill our list of chunks with any chunks that might be children of this object
@@ -107,6 +125,27 @@ public class CChunkEditorGen : MonoBehaviour
 	{
 		Vector2 t_v2Chunk = new Vector2(Mathf.RoundToInt(p_v3Pos.x / (float)msc_nChunkSize), Mathf.RoundToInt(p_v3Pos.y / (float)msc_nChunkSize));
 
+		// find the layer or create it
+		GameObject t_goLayer = null;
+
+		for (int t_i = 0; t_i < m_lstLayers.Count; ++t_i)
+		{
+			if (m_lstLayers[t_i].name == lstLayers[p_nLayer].m_strName)
+			{
+				t_goLayer = m_lstLayers[t_i];
+				break;
+			}
+		}
+
+		if (t_goLayer == null)
+		{
+			t_goLayer = new GameObject();
+			t_goLayer.name = lstLayers[p_nLayer].m_strName;
+			t_goLayer.transform.position = Vector3.zero;
+			t_goLayer.transform.parent = gameObject.transform;
+
+			m_lstLayers.Add(t_goLayer);
+		}
 
 		// Find the correct chunk that this tile belongs to
 		CChunk t_chunk = null;
@@ -125,7 +164,7 @@ public class CChunkEditorGen : MonoBehaviour
 		{
 			GameObject t_obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			t_obj.transform.position = new Vector3(t_v2Chunk.x * msc_nChunkSize, t_v2Chunk.y * msc_nChunkSize, p_nLayer * -.5f);
-			t_obj.transform.parent = gameObject.transform;
+			t_obj.transform.parent = t_goLayer.transform;
 			t_obj.name = "Chunk (" + t_v2Chunk.x + ", " + t_v2Chunk.y + ") : " + lstLayers[p_nLayer];
 
 			t_chunk = t_obj.AddComponent<CChunk>();
@@ -142,6 +181,8 @@ public class CChunkEditorGen : MonoBehaviour
 			// we're deleting a tile from an empty chunk, just leave
 			return;
 		}
+
+		
 
 		// Tile 0 of this chunk
 		Vector2 t_v2TileZero = new Vector2((t_v2Chunk.x * msc_nChunkSize) - Mathf.Floor(msc_nChunkSize / 2.0f), (t_v2Chunk.y * msc_nChunkSize) + Mathf.Floor(msc_nChunkSize / 2.0f));
@@ -185,6 +226,10 @@ public class CChunkEditorGen : MonoBehaviour
 				lstTiles.Add(new CTile(t_obj[t_i]));
 			}
 		}
+	}
+	public void vSetLayerActive(int p_nLayer, bool p_fActive)
+	{
+		m_lstLayers[p_nLayer].SetActive(p_fActive);
 	}
     #endregion
 

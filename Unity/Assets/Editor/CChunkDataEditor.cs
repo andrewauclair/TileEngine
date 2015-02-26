@@ -2,15 +2,15 @@
 using UnityEditor;
 using UnityEditorInternal;
 
-[CustomEditor(typeof(CChunkEditorGen))]
-public class CChunkEditorGenEditor : Editor
+[CustomEditor(typeof(CChunkData))]
+public class CChunkDataEditor : Editor
 {
 	// Undocumented ReoderableList to make things nice, could change without warning in future update.
 	private ReorderableList m_lstLayers;
 
 	public void OnEnable()
 	{
-		m_lstLayers = new ReorderableList(serializedObject, serializedObject.FindProperty("lstLayers"),
+		m_lstLayers = new ReorderableList(serializedObject, serializedObject.FindProperty("m_lstLayers"),
 			true, true, true, true);
 	}
 

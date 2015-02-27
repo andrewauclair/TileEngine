@@ -71,8 +71,14 @@ public class CChunkGenerator : MonoBehaviour
 			m_lstGOLayers.Add(t_goLayer);
 		}
 
-		CChunk[] t_aChunks = transform.GetComponentsInChildren<CChunk>();
+		CChunk[] t_aChunks = m_goWorld.transform.GetComponentsInChildren<CChunk>();
+		Debug.Log("chunks: " + t_aChunks.Length);
 		m_lstChunks = new List<CChunk>(t_aChunks);
+
+		for (int t_i = 0; t_i < t_aChunks.Length; ++t_i)
+		{
+			Debug.Log("layer: " + t_aChunks[t_i].nLayer + "\npos: " + t_aChunks[t_i].v2Position);
+		}
 	}
 	void Update()
 	{
@@ -139,9 +145,13 @@ public class CChunkGenerator : MonoBehaviour
 			DestroyImmediate(t_chunk.m_mesh);
 			DestroyImmediate(t_chunk.gameObject);
 		}
-		else
+		else if (lstLayers[p_nLayer].m_strName != "Collision")
 		{
 			vUpdateChunk(t_chunk);
+		}
+		else
+		{
+			vUpdateCollisions(t_chunk);
 		}
 	}
 	public void vSetTileset(string p_strTileset)
@@ -230,24 +240,29 @@ public class CChunkGenerator : MonoBehaviour
 				float t_ry = -((t_ySize * t_nTileSize) / 2.0f) + (t_y * t_nTileSize) + (t_nTileSize / 2.0f);
 
 				// create the 4 vertices for this tile
-				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
-				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
 				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
 				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
+
+				// 0,0
+				// 1,1
+				// 1,0
+				// 0,1
 
 				CTile t_Tile = lstTiles[t_lstData[(t_y * t_xSize) + t_x]];
 
-				t_aUVs[t_iUV++] = t_Tile.UV4;
+				t_aUVs[t_iUV++] = t_Tile.UV1;
 				t_aUVs[t_iUV++] = t_Tile.UV2;
 				t_aUVs[t_iUV++] = t_Tile.UV3;
-				t_aUVs[t_iUV++] = t_Tile.UV1;
+				t_aUVs[t_iUV++] = t_Tile.UV4;
 
 				// generate the 2 triangles for this tile
 				t_aTriangles[t_iTri++] = t_iVert - 4; // 0
 				t_aTriangles[t_iTri++] = t_iVert - 3; // 1
 				t_aTriangles[t_iTri++] = t_iVert - 2; // 2
-				t_aTriangles[t_iTri++] = t_iVert - 2; // 2
 				t_aTriangles[t_iTri++] = t_iVert - 3; // 1
+				t_aTriangles[t_iTri++] = t_iVert - 4; // 0
 				t_aTriangles[t_iTri++] = t_iVert - 1; // 3
 			}
 		}
@@ -264,6 +279,35 @@ public class CChunkGenerator : MonoBehaviour
 
 		t_meshFilter.mesh = p_chunk.m_mesh;
 		t_meshRenderer.material = AtlasMat;
+	}
+	public void vUpdateCollisions(CChunk p_chunk)
+	{
+		BoxCollider[] t_aColliders = p_chunk.gameObject.GetComponentsInChildren<BoxCollider>();
+
+		for (int t_i = 0; t_i < t_aColliders.Length; ++t_i)
+		{
+			DestroyImmediate(t_aColliders[t_i].gameObject);
+		}
+		List<int> t_lstData = p_chunk.lstData();
+
+		for (int t_y = 0; t_y < 11; ++t_y)
+		{
+			for (int t_x = 0; t_x < 11; ++t_x)
+			{
+				if (t_lstData[(t_y * 11) + t_x] == -1)
+				{
+					continue;
+				}
+				// calculate the center of this tile
+				float t_rx = -((11 * 1) / 2.0f) + (t_x * 1) + (1 / 2.0f);
+				float t_ry = -((11 * 1) / 2.0f) + (t_y * 1) + (1 / 2.0f);
+
+				GameObject t_goCollider = new GameObject();
+				t_goCollider.transform.position = new Vector3(t_rx, t_ry, 0f);
+				t_goCollider.AddComponent<BoxCollider>();
+				t_goCollider.transform.parent = p_chunk.gameObject.transform;
+			}
+		}
 	}
 	#endregion
 

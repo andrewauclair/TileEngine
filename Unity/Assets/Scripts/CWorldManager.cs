@@ -69,6 +69,12 @@ public class CWorldManager : MonoBehaviour
     void Awake()
     {
 		m_Instance = GetComponent<CWorldManager>();
+
+		GameObject t_goCharacter = GameObject.FindGameObjectWithTag("Player");
+		m_character = t_goCharacter.GetComponent<CCharacter>();
+
+		CChunk[] t_aChunks = transform.GetComponentsInChildren<CChunk>();
+		m_lstChunks = new List<CChunk>(t_aChunks);
     }
     void Start()
     {	
@@ -82,10 +88,10 @@ public class CWorldManager : MonoBehaviour
 		
 		if (m_fLeftPressed && !m_fMoving)
 		{
+			m_character.Animator.SetInteger("Direction", 1);
 			if (!Physics.Raycast(transform.position, Vector3.left, .75f))
 			{
 				m_fMoving = true;
-				m_character.Animator.SetInteger("Direction", 1);
 				m_character.Animator.SetBool("Idle", false);
 				m_v3Start = transform.position;
 				m_v3Target = new Vector3(m_v3Start.x + 1, m_v3Start.y, 0f);
@@ -94,10 +100,10 @@ public class CWorldManager : MonoBehaviour
 		}
 		if (m_fRightPressed && !m_fMoving)
 		{
+			m_character.Animator.SetInteger("Direction", 3);
 			if (!Physics.Raycast(transform.position, Vector3.right, .75f))
 			{
 				m_fMoving = true;
-				m_character.Animator.SetInteger("Direction", 3);
 				m_character.Animator.SetBool("Idle", false);
 				m_v3Start = transform.position;
 				m_v3Target = new Vector3(m_v3Start.x - 1, m_v3Start.y, 0f);
@@ -106,10 +112,10 @@ public class CWorldManager : MonoBehaviour
 		}
 		if (m_fUpPressed && !m_fMoving)
 		{
+			m_character.Animator.SetInteger("Direction", 2);
 			if (!Physics.Raycast(transform.position, Vector3.up, .75f))
 			{
 				m_fMoving = true;
-				m_character.Animator.SetInteger("Direction", 2);
 				m_character.Animator.SetBool("Idle", false);
 				m_v3Start = transform.position;
 				m_v3Target = new Vector3(m_v3Start.x, m_v3Start.y - 1, 0f);
@@ -118,10 +124,10 @@ public class CWorldManager : MonoBehaviour
 		}
 		if (m_fDownPressed && !m_fMoving)
 		{
+			m_character.Animator.SetInteger("Direction", 0);
 			if (!Physics.Raycast(transform.position, Vector3.down, .75f))
 			{
 				m_fMoving = true;
-				m_character.Animator.SetInteger("Direction", 0);
 				m_character.Animator.SetBool("Idle", false);
 				m_v3Start = transform.position;
 				m_v3Target = new Vector3(m_v3Start.x, m_v3Start.y + 1, 0f);

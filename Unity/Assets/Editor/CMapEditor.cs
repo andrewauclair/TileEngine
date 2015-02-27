@@ -16,9 +16,8 @@ public class CMapEditor : EditorWindow
 
 	#region Private Data
 	private Texture2D m_tex2dTileset = null;
+	private Texture2D m_tex2dHighlight = null;
 
-	private List<List<int>> m_lstTileNums = new List<List<int>>();
-	
 	private string[] m_aStrTilesets = new string[0];
 	private CLayer[] m_aLayers = new CLayer[0];
 	private string[] m_aStrLayers = new string[0];
@@ -49,8 +48,6 @@ public class CMapEditor : EditorWindow
 	public CMapEditor()
 	{
 		Instance = this;
-
-		Debug.Log("Create Map Editor Window");
 
 		SceneView.onSceneGUIDelegate += SceneGUI;
 		wantsMouseMove = true;
@@ -107,31 +104,24 @@ public class CMapEditor : EditorWindow
 
 		bool t_fEnabled = EditorGUILayout.Toggle("Editing", m_fEnabled);
 
-		if (t_fEnabled != m_fEnabled && t_fEnabled)
+		if (t_fEnabled != m_fEnabled)
 		{
-			m_goPreview.gameObject.SetActive(true);
+			m_goPreview.gameObject.SetActive(t_fEnabled);
 			Selection.objects = new UnityEngine.Object[0];
-		}
-		else if (t_fEnabled != m_fEnabled && !t_fEnabled)
-		{
-			m_goPreview.gameObject.SetActive(false);
 		}
 
 		m_fEnabled = t_fEnabled;
 
 		int t_nPrevTileset = m_nSelectedTileset;
 		int t_nPrevTileSize = m_nTileSize;
-		int t_nPrevLayer = m_nSelectedLayer;
 		int t_nPrevMask = m_nLayerMask;
 
 		m_nSelectedTileset = EditorGUILayout.Popup("Tileset", m_nSelectedTileset, m_aStrTilesets);
-		m_nTileSize = EditorGUILayout.IntPopup("Tile Size", m_nTileSize, ms_aTileSizeDisplays, ms_aTileSizeValues);
 		m_nLayerMask = EditorGUILayout.MaskField("Display Layers", m_nLayerMask, m_aStrLayers);
 		m_nSelectedLayer = EditorGUILayout.Popup("Edit Layer", m_nSelectedLayer, m_aStrLayers);
 		
 		if (m_nSelectedTileset != t_nPrevTileset)
 		{
-			Debug.Log("Tileset selection changed.");
 			m_nSelectedTile = 0;
 			
 			// load the material for this tileset
@@ -142,15 +132,13 @@ public class CMapEditor : EditorWindow
 			vUpdatePreviewMesh();
 		}
 
-		if (m_nTileSize != t_nPrevTileSize)
-		{
-			// update the tileset texture
-			vUpdatePreviewMesh();
-		}
-
 		if (m_tex2dTileset != null && position.width + m_nTileSize < m_tex2dTileset.width)
 		{
 			// update the tileset texture
+			vUpdateTilesetTexture();
+		}
+		else if (m_tex2dTileset != null && position.width - m_nTileSize > m_tex2dTileset.width)
+		{
 			vUpdateTilesetTexture();
 		}
 
@@ -162,9 +150,6 @@ public class CMapEditor : EditorWindow
 				CChunkGenerator.Instance.vSetLayerActive(t_i, ((1 << t_i) & m_nLayerMask) > 0);
 			}
 		}
-
-		int t_nScrollWidth = (m_tex2dTileset != null) ? m_tex2dTileset.width : 0;
-		int t_nScrollHeight = (m_tex2dTileset != null) ? m_tex2dTileset.height : 0;
 
 		m_v2ScrollPos = EditorGUILayout.BeginScrollView(m_v2ScrollPos, GUILayout.ExpandHeight(true));
 		EditorGUILayout.BeginVertical();
@@ -281,7 +266,7 @@ public class CMapEditor : EditorWindow
 	private void vRefreshTilesetList()
 	{
 		string[] t_aStrTilesets = Directory.GetFiles(Application.dataPath + "/Resources/Tilesets", "*.bytes");
-		string[] t_aStrTextures = Directory.GetFiles(Application.dataPath + "/Art/Tilesets", "*.png");
+		//string[] t_aStrTextures = Directory.GetFiles(Application.dataPath + "/Art/Tilesets", "*.png");
 
 		if (t_aStrTilesets.Length != m_aStrTilesets.Length)
 		{
@@ -392,29 +377,15 @@ public class CMapEditor : EditorWindow
 			m_goPreview.hideFlags = HideFlags.HideAndDontSave;
 		}
 
-		Vector3[] t_aVertices = new Vector3[4];
 		Vector2[] t_aUVs = new Vector2[4];
-		int[] t_aTriangles = new int[6];
 
-		t_aVertices[0] = new Vector3(-.5f, .5f, 0);
-		t_aVertices[1] = new Vector3(.5f, .5f, 0);
-		t_aVertices[2] = new Vector3(-.5f, -.5f, 0);
-		t_aVertices[3] = new Vector3(.5f, -.5f, 0);
-		Debug.Log("tiles: " + CChunkGenerator.Instance.lstTiles.Count);
 		CTile t_Tile = CChunkGenerator.Instance.lstTiles[m_nSelectedTile];
 		MeshFilter t_meshFilter = m_goPreview.GetComponent<MeshFilter>();
 
-		t_aUVs[0] = t_Tile.UV3;
+		t_aUVs[0] = t_Tile.UV1;
 		t_aUVs[1] = t_Tile.UV2;
-		t_aUVs[2] = t_Tile.UV1;
+		t_aUVs[2] = t_Tile.UV3;
 		t_aUVs[3] = t_Tile.UV4;
-
-		t_aTriangles[0] = 0;
-		t_aTriangles[1] = 1;
-		t_aTriangles[2] = 2;
-		t_aTriangles[3] = 2;
-		t_aTriangles[4] = 1;
-		t_aTriangles[5] = 3;
 
 		t_meshFilter.sharedMesh.uv = t_aUVs;
 		t_meshFilter.sharedMesh.RecalculateNormals();
@@ -435,8 +406,6 @@ public class CMapEditor : EditorWindow
 		int t_nTexWidth = m_tex2dTileset.width;
 		int t_nTexHeight = m_tex2dTileset.height;
 		
-		int t_nTileWidthOld = t_nTexWidth / m_nTileSize;
-		int t_nTileHeightOld = t_nTexHeight / m_nTileSize;
 		int t_nTiles = (t_nTexWidth / m_nTileSize) * (t_nTexHeight / m_nTileSize);
 
 		int t_nEditorWidth = Mathf.RoundToInt(position.width);

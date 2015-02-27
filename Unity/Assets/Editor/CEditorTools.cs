@@ -29,22 +29,16 @@ public class CEditorTools : MonoBehaviour
 
 			if (t_texture != null)
 			{
-				Debug.Log("Found texture");
-
 				// assume tile of 32px
 				int t_nWidth = t_texture.width;
 				int t_nHeight = t_texture.height;
-				Debug.Log("width: " + t_nWidth);
-				Debug.Log("height: " + t_nHeight);
-
+				
 				int t_nTilesWidth = t_nWidth / 32;
 				int t_nTilesHeight = t_nHeight / 32;
 
 				float t_rUVWidth = 32 / (float)t_nWidth;
 				float t_rUVHeight = 32 / (float)t_nHeight;
-				Debug.Log("uv width: " + t_rUVWidth);
-				Debug.Log("uv height: " + t_rUVHeight);
-
+				
 				JSONObject t_JSON = new JSONObject();
 
 				List<CTile> t_lstTiles = new List<CTile>();
@@ -58,10 +52,10 @@ public class CEditorTools : MonoBehaviour
 						int t_nTile = ((t_nTilesHeight - 1 - t_y) * t_nTilesWidth) + t_x;
 
 						t_tile.Tile = t_nTile;
-						
-						t_tile.UV1 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, t_y * t_rUVHeight);					// (1,0)
+
+						t_tile.UV1 = new Vector2(t_x * t_rUVWidth, t_y * t_rUVHeight);									// (0,0)
 						t_tile.UV2 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);	// (1,1)
-						t_tile.UV3 = new Vector2(t_x * t_rUVWidth, t_y * t_rUVHeight);									// (0,0)
+						t_tile.UV3 = new Vector2((t_x * t_rUVWidth) + t_rUVWidth, t_y * t_rUVHeight);					// (1,0)
 						t_tile.UV4 = new Vector2(t_x * t_rUVWidth, (t_y * t_rUVHeight) + t_rUVHeight);					// (0,1)
 						
 						t_lstTiles.Add(t_tile);
@@ -73,15 +67,10 @@ public class CEditorTools : MonoBehaviour
 						return p_t1.Tile.CompareTo(p_t2.Tile);
 					});
 
-				Debug.Log("tiles: " + t_lstTiles.Count);
-
 				foreach (CTile t_Tile in t_lstTiles)
 				{
 					t_JSON.Add(t_Tile.ToJSON());
 				}
-
-				// Delete old file if there is one
-				//File.Delete(Application.dataPath + "/Resources/JSON/" + t_texture.name + ".bytes");
 
 				// check for Tilesets folder
 				Directory.CreateDirectory(Application.dataPath + "/Resources/Tilesets");
@@ -99,13 +88,5 @@ public class CEditorTools : MonoBehaviour
 				Debug.Log("Saved file to: " + Application.dataPath + "/Resources/Tilesets/" + t_texture.name + ".json");
 			}
 		}
-	}
-
-	[MenuItem(msc_strToolsName + "/Scene Setup")]
-	private static void vSetupScene()
-	{
-		// Camera with CFixedCamera set to the default value for height
-		// Instance of Canvas prefab with arrow controls
-		// CEditorManager - This script handles editing the tile meshes
 	}
 }

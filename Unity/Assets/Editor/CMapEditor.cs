@@ -108,6 +108,7 @@ public class CMapEditor : EditorWindow
 		{
 			m_goPreview.gameObject.SetActive(t_fEnabled);
 			Selection.objects = new UnityEngine.Object[0];
+			Tools.current = t_fEnabled ? Tool.View : Tool.None;
 		}
 
 		m_fEnabled = t_fEnabled;
@@ -119,7 +120,9 @@ public class CMapEditor : EditorWindow
 		m_nSelectedTileset = EditorGUILayout.Popup("Tileset", m_nSelectedTileset, m_aStrTilesets);
 		m_nLayerMask = EditorGUILayout.MaskField("Display Layers", m_nLayerMask, m_aStrLayers);
 		m_nSelectedLayer = EditorGUILayout.Popup("Edit Layer", m_nSelectedLayer, m_aStrLayers);
-		
+
+		EditorGUILayout.IntField(GUIUtility.hotControl);
+
 		if (m_nSelectedTileset != t_nPrevTileset)
 		{
 			m_nSelectedTile = 0;
@@ -172,12 +175,15 @@ public class CMapEditor : EditorWindow
 	}
 	public void SceneGUI(SceneView p_sceneView)
 	{
+		p_sceneView.Repaint();
+		Repaint();
+
+
 		if (!m_fEnabled)
 		{
 			return;
 		}
 
-		p_sceneView.Repaint();
 		
 		Tools.current = Tool.View;
 
@@ -231,6 +237,7 @@ public class CMapEditor : EditorWindow
 
 			if (!m_fShiftDown)
 			{
+				Debug.Log("release hotcontrol");
 				GUIUtility.hotControl = 0;
 			}
 		}
@@ -241,6 +248,7 @@ public class CMapEditor : EditorWindow
 
 			if (!t_Event.shift)
 			{
+				Debug.Log("take control with hotcon");
 				GUIUtility.hotControl = t_nControlID;
 				vAddTile(t_v2Pos);
 				m_v2PrevPos = t_v2Pos;
@@ -255,6 +263,7 @@ public class CMapEditor : EditorWindow
 
 			if (!t_Event.shift)
 			{
+				Debug.Log("take control with hotcontrol.");
 				GUIUtility.hotControl = t_nControlID;
 				vRemoveTile(t_v2Pos);
 				m_v2PrevPos = t_v2Pos;

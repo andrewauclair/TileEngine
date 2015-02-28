@@ -2,12 +2,12 @@ Unity 3D Smutty-Nose Tile Engine
 
 Editor Tasks
 - Player layer functionality
-- Collision layer and functionality
-- Map Editor disallow tiles on player and collision layers or certain layers, m_fTilesAllow in CLayer
++ Collision layer and functionality
++ Map Editor disallow tiles on player and collision layers or certain layers, m_fTilesAllow in CLayer
 + Fix scrolling for tileset texture
 + Fix tileset texture resizing issue
-- make display layers mask actually work
-- Layer object in hierarchy
++ make display layers mask actually work
++ Layer object in hierarchy
 - outline on preview object in scene
 - selection highlight on tileset texture
 - multiple tile selection
@@ -22,5 +22,5 @@ Editor Tasks
 - usability in side scroller
 
 Game Tasks
-- Implement Collision, generate box colliders in editor chunk gen?
++ Implement Collision, generate box colliders in editor chunk gen?
 - Map transfer, each map is a separate scene

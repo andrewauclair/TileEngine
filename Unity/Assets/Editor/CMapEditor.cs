@@ -178,25 +178,18 @@ public class CMapEditor : EditorWindow
 		p_sceneView.Repaint();
 		Repaint();
 
-
 		if (!m_fEnabled)
 		{
 			return;
 		}
-
 		
 		Tools.current = Tool.View;
 
 		Event t_Event = Event.current;
 
-		if (t_Event.type == EventType.keyDown || t_Event.type == EventType.KeyDown)
-		{
-			Debug.Log("key down: " + t_Event.keyCode);
-		}
-
 		Vector2 t_v2Pos = v2GridPos(t_Event.mousePosition, p_sceneView.camera);
 
-		if (t_Event.type == EventType.MouseMove || t_Event.type == EventType.mouseMove)
+		if (t_Event.type == EventType.MouseMove)
 		{
 			m_goPreview.transform.position = new Vector3(t_v2Pos.x, t_v2Pos.y, (-.5f * m_nSelectedLayer) - .25f);
 		}
@@ -204,7 +197,7 @@ public class CMapEditor : EditorWindow
 		int t_nControlID = GUIUtility.GetControlID(GetHashCode(), FocusType.Passive);
 
 		// Drag to add more of the current tile
-		if ((t_Event.type == EventType.MouseDrag || t_Event.type == EventType.mouseDrag) && t_Event.button == 0 && !m_fShiftDown)
+		if (t_Event.type == EventType.MouseDrag && t_Event.button == 0 && !m_fShiftDown)
 		{
 			if (!m_fShiftDown)
 			{
@@ -219,7 +212,7 @@ public class CMapEditor : EditorWindow
 			}
 		}
 		// Drag to delete more tiles
-		if ((t_Event.type == EventType.MouseDrag || t_Event.type == EventType.mouseDrag) && t_Event.button == 1 && !m_fShiftDown)
+		if (t_Event.type == EventType.MouseDrag && t_Event.button == 1 && !m_fShiftDown)
 		{
 			if (t_v2Pos != m_v2PrevPos)
 			{
@@ -231,31 +224,29 @@ public class CMapEditor : EditorWindow
 			t_Event.Use();
 		}
 		// Stop taking control of the GUI input
-		if (t_Event.rawType == EventType.MouseUp && GUIUtility.hotControl != 0)
+		if (t_Event.rawType == EventType.MouseUp && GUIUtility.hotControl != 0 && (t_Event.button == 0 || t_Event.button == 1))
 		{
 			m_goPreview.SetActive(true);
 
 			if (!m_fShiftDown)
 			{
-				Debug.Log("release hotcontrol");
 				GUIUtility.hotControl = 0;
 			}
 		}
 		// Add a tile in this position
-		if ((t_Event.type == EventType.MouseDown || t_Event.type == EventType.mouseDown) && t_Event.button == 0)
+		if (t_Event.type == EventType.MouseDown && t_Event.button == 0)
 		{
 			m_fShiftDown = t_Event.shift;
 
 			if (!t_Event.shift)
 			{
-				Debug.Log("take control with hotcon");
 				GUIUtility.hotControl = t_nControlID;
 				vAddTile(t_v2Pos);
 				m_v2PrevPos = t_v2Pos;
 			}
 		}
 		// Delete a tile in this position
-		if ((t_Event.type == EventType.MouseDown || t_Event.type == EventType.mouseDown) && t_Event.button == 1)
+		if (t_Event.type == EventType.MouseDown && t_Event.button == 1)
 		{
 			m_goPreview.SetActive(false);
 
@@ -263,7 +254,6 @@ public class CMapEditor : EditorWindow
 
 			if (!t_Event.shift)
 			{
-				Debug.Log("take control with hotcontrol.");
 				GUIUtility.hotControl = t_nControlID;
 				vRemoveTile(t_v2Pos);
 				m_v2PrevPos = t_v2Pos;
@@ -328,7 +318,7 @@ public class CMapEditor : EditorWindow
 		Event t_Event = Event.current;
 		bool t_fMouseDown = false;
 		bool t_fMouseUp = false;
-
+		
 		if (t_Event.type == EventType.MouseDown)
 		{
 			t_fMouseDown = true;
@@ -348,6 +338,12 @@ public class CMapEditor : EditorWindow
 			int p_yTile = Mathf.FloorToInt((p_v2MousePos.y - m_v2TexturePos.y) / (float)m_nTileSize);
 
 			int p_nTile = (p_yTile * (m_tex2dTileset.width / m_nTileSize)) + p_xTile;
+
+			if (p_v2MousePos.x - m_v2TexturePos.x > m_tex2dTileset.width ||
+				p_v2MousePos.y - m_v2TexturePos.y > m_tex2dTileset.height)
+			{
+				return;
+			}
 			m_nSelectedTile = p_nTile;
 			vUpdatePreviewMesh();
 		}

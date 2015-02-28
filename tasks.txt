@@ -17,6 +17,7 @@ Editor Tasks
 - paint bucket
 - brush sizes?
 - randomizer? uses multiple tile selection and places a random one every time a new tile is added in a location
+- Optimize Collision generation
 
 - isometric?
 - usability in side scroller
@@ -24,3 +25,9 @@ Editor Tasks
 Game Tasks
 + Implement Collision, generate box colliders in editor chunk gen?
 - Map transfer, each map is a separate scene
+
+
+End Goal, feature set
+
+	Map Editor with layers, collision, event functionality(switch scenes for builds/towns/rooms)
+	Game that show cases the map editor functionality

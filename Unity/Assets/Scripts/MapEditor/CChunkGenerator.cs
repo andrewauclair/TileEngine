@@ -38,7 +38,6 @@ public class CChunkGenerator : MonoBehaviour
 
 		m_strCurrentScene = EditorApplication.currentScene;
 
-		// TODO: get layers from CChunkData
 		CChunkData t_chunkData = FindObjectOfType<CChunkData>();
 		if (t_chunkData != null)
 		{
@@ -46,9 +45,9 @@ public class CChunkGenerator : MonoBehaviour
 		}
 		m_aTestData.Clear();
 
-		for (int t_x = 0; t_x < 11; ++t_x)
+		for (int t_x = 0; t_x < msc_nChunkSize; ++t_x)
 		{
-			for (int t_y = 0; t_y < 11; ++t_y)
+			for (int t_y = 0; t_y < msc_nChunkSize; ++t_y)
 			{
 				m_aTestData.Add(-1);
 			}
@@ -65,20 +64,14 @@ public class CChunkGenerator : MonoBehaviour
 				t_goLayer = new GameObject();
 				t_goLayer.name = lstLayers[t_i].m_strName;
 				t_goLayer.transform.position = Vector3.zero;
-				t_goLayer.transform.parent = m_goWorld.transform; // TODO: parent to the world
+				t_goLayer.transform.parent = m_goWorld.transform;
 			}
 
 			m_lstGOLayers.Add(t_goLayer);
 		}
 
 		CChunk[] t_aChunks = m_goWorld.transform.GetComponentsInChildren<CChunk>();
-		Debug.Log("chunks: " + t_aChunks.Length);
 		m_lstChunks = new List<CChunk>(t_aChunks);
-
-		for (int t_i = 0; t_i < t_aChunks.Length; ++t_i)
-		{
-			Debug.Log("layer: " + t_aChunks[t_i].nLayer + "\npos: " + t_aChunks[t_i].v2Position);
-		}
 	}
 	void Update()
 	{
@@ -206,11 +199,7 @@ public class CChunkGenerator : MonoBehaviour
 	}
 	public void vUpdateChunk(CChunk p_chunk)
 	{
-		int t_xSize = 11;
-		int t_ySize = 11;
-		int t_nTileSize = 1;
-
-		int t_cTiles = t_xSize * t_ySize;
+		int t_cTiles = msc_nChunkSize * msc_nChunkSize;
 		int t_cTris = t_cTiles * 2;
 
 		DestroyImmediate(p_chunk.m_mesh);
@@ -227,30 +216,25 @@ public class CChunkGenerator : MonoBehaviour
 		int t_iTri = 0;
 		int t_iUV = 0;
 
-		for (int t_y = 0; t_y < t_ySize; ++t_y)
+		for (int t_y = 0; t_y < msc_nChunkSize; ++t_y)
 		{
-			for (int t_x = 0; t_x < t_xSize; ++t_x)
+			for (int t_x = 0; t_x < msc_nChunkSize; ++t_x)
 			{
-				if (t_lstData[(t_y * t_xSize) + t_x] == -1)
+				if (t_lstData[(t_y * msc_nChunkSize) + t_x] == -1)
 				{
 					continue;
 				}
 				// calculate the center of this tile
-				float t_rx = -((t_xSize * t_nTileSize) / 2.0f) + (t_x * t_nTileSize) + (t_nTileSize / 2.0f);
-				float t_ry = -((t_ySize * t_nTileSize) / 2.0f) + (t_y * t_nTileSize) + (t_nTileSize / 2.0f);
+				float t_rx = -msc_nChunkSize / 2.0f + t_x + .5f;
+				float t_ry = -msc_nChunkSize / 2.0f + t_y + .5f;
 
 				// create the 4 vertices for this tile
-				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0f);
-				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
-				t_aVertices[t_iVert++] = new Vector3(t_rx + (t_nTileSize / 2.0f), t_ry - (t_nTileSize / 2.0f), 0f);
-				t_aVertices[t_iVert++] = new Vector3(t_rx - (t_nTileSize / 2.0f), t_ry + (t_nTileSize / 2.0f), 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx - .5f, t_ry - .5f, 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx + .5f, t_ry + .5f, 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx + .5f, t_ry - .5f, 0f);
+				t_aVertices[t_iVert++] = new Vector3(t_rx - .5f, t_ry + .5f, 0f);
 
-				// 0,0
-				// 1,1
-				// 1,0
-				// 0,1
-
-				CTile t_Tile = lstTiles[t_lstData[(t_y * t_xSize) + t_x]];
+				CTile t_Tile = lstTiles[t_lstData[(t_y * msc_nChunkSize) + t_x]];
 
 				t_aUVs[t_iUV++] = t_Tile.UV1;
 				t_aUVs[t_iUV++] = t_Tile.UV2;
@@ -290,17 +274,17 @@ public class CChunkGenerator : MonoBehaviour
 		}
 		List<int> t_lstData = p_chunk.lstData();
 
-		for (int t_y = 0; t_y < 11; ++t_y)
+		for (int t_y = 0; t_y < msc_nChunkSize; ++t_y)
 		{
-			for (int t_x = 0; t_x < 11; ++t_x)
+			for (int t_x = 0; t_x < msc_nChunkSize; ++t_x)
 			{
-				if (t_lstData[(t_y * 11) + t_x] == -1)
+				if (t_lstData[(t_y * msc_nChunkSize) + t_x] == -1)
 				{
 					continue;
 				}
 				// calculate the center of this tile
-				float t_rx = -((11 * 1) / 2.0f) + (t_x * 1) + (1 / 2.0f);
-				float t_ry = -((11 * 1) / 2.0f) + (t_y * 1) + (1 / 2.0f);
+				float t_rx = -msc_nChunkSize / 2.0f + t_x + .5f;
+				float t_ry = -msc_nChunkSize / 2.0f + t_y + .5f;
 
 				GameObject t_goCollider = new GameObject();
 				t_goCollider.transform.position = new Vector3(t_rx, t_ry, 0f);

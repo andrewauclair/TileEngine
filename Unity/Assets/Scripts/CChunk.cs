@@ -35,11 +35,13 @@ public class CChunk : MonoBehaviour
 		Gizmos.color = Color.white;
 		
 		float t_rHalfChunk = t_nChunkSize / 2.0f;
+		float t_x = transform.position.x;
+		float t_y = transform.position.y;
 
-		Vector3 t_v3TopLeft = new Vector3(transform.position.x - t_rHalfChunk, transform.position.y + t_rHalfChunk, 0f);
-		Vector3 t_v3TopRight = new Vector3(transform.position.x + t_rHalfChunk, transform.position.y + t_rHalfChunk, 0f);
-		Vector3 t_v3BottomLeft = new Vector3(transform.position.x - t_rHalfChunk, transform.position.y - t_rHalfChunk, 0f);
-		Vector3 t_v3BottomRight = new Vector3(transform.position.x + t_rHalfChunk, transform.position.y - t_rHalfChunk, 0f);
+		Vector3 t_v3TopLeft = new Vector3(t_x - t_rHalfChunk, t_y + t_rHalfChunk, 0f);
+		Vector3 t_v3TopRight = new Vector3(t_x + t_rHalfChunk, t_y + t_rHalfChunk, 0f);
+		Vector3 t_v3BottomLeft = new Vector3(t_x - t_rHalfChunk, t_y - t_rHalfChunk, 0f);
+		Vector3 t_v3BottomRight = new Vector3(t_x + t_rHalfChunk, t_y - t_rHalfChunk, 0f);
 
 		Gizmos.DrawLine(t_v3TopLeft, t_v3TopRight);
 		Gizmos.DrawLine(t_v3TopRight, t_v3BottomRight);

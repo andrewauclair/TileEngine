@@ -24,7 +24,6 @@ public class CChunkGenerator : MonoBehaviour
 	private List<GameObject> m_lstGOLayers = new List<GameObject>();
 	private List<CChunk> m_lstChunks = new List<CChunk>();
 	private List<int> m_aTestData = new List<int>();
-	private string m_strCurrentScene = "";
 	private GameObject m_goWorld = null;
 	#endregion
 
@@ -34,10 +33,6 @@ public class CChunkGenerator : MonoBehaviour
 		Instance = this;
 
 		m_goWorld = GameObject.FindGameObjectWithTag("World");
-
-#if UNITY_EDITOR
-		m_strCurrentScene = UnityEditor.EditorApplication.currentScene;
-#endif
 
 		CChunkData t_chunkData = FindObjectOfType<CChunkData>();
 		if (t_chunkData != null)
@@ -73,15 +68,6 @@ public class CChunkGenerator : MonoBehaviour
 
 		CChunk[] t_aChunks = m_goWorld.transform.GetComponentsInChildren<CChunk>();
 		m_lstChunks = new List<CChunk>(t_aChunks);
-	}
-	void Update()
-	{
-#if UNITY_EDITOR
-		if (UnityEditor.EditorApplication.currentScene != m_strCurrentScene)
-		{
-			OnEnable();
-		}
-#endif
 	}
 	#endregion
 
@@ -211,6 +197,10 @@ public class CChunkGenerator : MonoBehaviour
 
 		t_chunk.m_mesh = new Mesh();
 
+#if UNITY_EDITOR
+		UnityEditor.Undo.RegisterCreatedObjectUndo(t_obj, "Created " + t_obj.name);
+#endif
+
 		return t_chunk;
 	}
 	private void vUpdateChunk(CChunk p_chunk)
@@ -267,6 +257,10 @@ public class CChunkGenerator : MonoBehaviour
 
 		t_meshFilter.mesh = p_chunk.m_mesh;
 		t_meshRenderer.material = AtlasMat;
+
+#if UNITY_EDITOR
+		UnityEditor.Undo.RegisterUndo(p_chunk.gameObject, "Updated " + p_chunk.gameObject.name);
+#endif
 	}
 	private void vUpdateCollisions(CChunk p_chunk)
 	{
@@ -296,6 +290,10 @@ public class CChunkGenerator : MonoBehaviour
 				t_goCollider.transform.parent = p_chunk.gameObject.transform;
 			}
 		}
+
+#if UNITY_EDITOR
+		UnityEditor.Undo.RegisterUndo(p_chunk.gameObject, "Update Collision " + p_chunk.gameObject.name);
+#endif
 	}
 	private void vGenerateTile(float p_x, float p_y, float p_rSize, CTile p_tile, List<Vector3> p_lstVertices, List<Vector2> p_lstUVs, List<int> p_lstTriangles)
 	{
@@ -348,6 +346,7 @@ public class CChunkGenerator : MonoBehaviour
 
 		// 40, 41
 		// 48, 49
+		CTile t_tileEdges = lstTiles[33];
 		CTile t_tileTL = lstTiles[40];
 		CTile t_tileTR = lstTiles[41];
 		CTile t_tileBL = lstTiles[48];
@@ -359,134 +358,6 @@ public class CChunkGenerator : MonoBehaviour
 		float t_yT = t_ry + .25f;
 		float t_yB = t_ry - .25f;
 		float t_xR = t_rx + .25f;
-
-		// sides
-		bool t_fTop = p_chunk.lstData()[(p_y - 1) * msc_nChunkSize + p_x] != -1;
-		bool t_fBottom = p_chunk.lstData()[(p_y + 1) * msc_nChunkSize + p_x] != -1;
-		bool t_fLeft = p_chunk.lstData()[p_y * msc_nChunkSize + p_x - 1] != -1;
-		bool t_fRight = p_chunk.lstData()[p_y * msc_nChunkSize + p_x + 1] != -1;
-
-		// corners
-		bool t_fTopLeft = p_chunk.lstData()[(p_y - 1) * msc_nChunkSize + p_x - 1] != -1;
-		bool t_fTopRight = p_chunk.lstData()[(p_y - 1) * msc_nChunkSize + p_x + 1] != -1;
-		bool t_fBottomLeft = p_chunk.lstData()[(p_y + 1) * msc_nChunkSize + p_x - 1] != -1;
-		bool t_fBottomRight = p_chunk.lstData()[(p_y + 1) * msc_nChunkSize + p_x + 1] != -1;
-
-		// top left
-		int t_nTL = 0;
-		int t_nTR = 0;
-		int t_nBL = 0;
-		int t_nBR = 0;
-
-		if (t_fTopLeft) t_nTL++;
-		if (t_fTopRight) t_nTR++;
-		if (t_fBottomLeft) t_nBL++;
-		if (t_fBottomRight) t_nBR++;
-
-		if (t_fTop)
-		{
-			t_nTL++;
-			t_nTR++;
-		}
-
-		if (t_fBottom)
-		{
-			t_nBL++;
-			t_nBR++;
-		}
-
-		if (t_fLeft)
-		{
-			t_nTL++;
-			t_nBL++;
-		}
-
-		if (t_fRight)
-		{
-			t_nTR++;
-			t_nBR++;
-		}
-
-		switch (t_nTL)
-		{
-			case 0:
-				{
-					//vGenerateTile(t_xL, t_yT, .5f, t_tileTL.tileTopLeft(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-			case 3:
-				{
-					vGenerateTile(t_xL, t_yT, .5f, t_tileTL.tileBottomRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-			default:
-				{
-					if (t_fTop || t_fBottom)
-					{
-						//vGenerateTile(t_xL, t_yT, .5f, t_tileTL.tileBottomLeft(), p_lstVertices, p_lstUVs, p_lstTriangles);
-					}
-					else
-					{
-						//vGenerateTile(t_xL, t_yT, .5f, t_tileTL.tileTopRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-					}
-				}break;
-		}
-
-		switch (t_nTR)
-		{
-			case 0:
-				{
-					//vGenerateTile(t_xR, t_yT, .5f, t_tileTR.tileTopRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-			case 3:
-				{
-					vGenerateTile(t_xR, t_yT, .5f, t_tileTR.tileBottomLeft(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-			default:
-				{
-					if (t_fTop || t_fBottom)
-					{
-						//vGenerateTile(t_xR, t_yT, .5f, t_tileTR.tileBottomRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-					}
-					else
-					{
-						//vGenerateTile(t_xR, t_yT, .5f, t_tileTR.tileTopLeft(), p_lstVertices, p_lstUVs, p_lstTriangles);
-					}
-				}break;
-		}
-
-		switch (t_nBL)
-		{
-			case 0:
-				{
-					//vGenerateTile(t_xL, t_yB, .5f, t_tileBL.tileBottomLeft(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-			case 3:
-				{
-					vGenerateTile(t_xL, t_yB, .5f, t_tileBL.tileTopRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-			default:
-				{
-					if (t_fTop || t_fBottom)
-					{
-						//vGenerateTile(t_xL, t_yB, .5f, t_tileBL.tileTopRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-					}
-					else
-					{
-						//vGenerateTile(t_xL, t_yB, .5f, t_tileBL.tileTopRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-					}
-				}break;
-		}
-
-		switch (t_nBR)
-		{
-			case 0:
-				{
-					vGenerateTile(t_xR, t_yB, .5f, t_tileBR.tileBottomRight(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-			case 3:
-				{
-					vGenerateTile(t_xR, t_yB, .5f, t_tileBR.tileTopLeft(), p_lstVertices, p_lstUVs, p_lstTriangles);
-				}break;
-		}
 	}
 	#endregion
 }

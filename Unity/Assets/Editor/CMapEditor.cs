@@ -30,6 +30,10 @@ public class CMapEditor : EditorWindow
 
 	private bool m_fEnabled = false;
 	private bool m_fShiftDown = false;
+	private bool m_fCompiling = false;
+	private bool m_fIsPlaying = false;
+
+	private string m_strCurrentScene = "";
 
 	private GameObject m_goPreview = null;
 	private GameObject m_goGenerator = null;
@@ -50,6 +54,8 @@ public class CMapEditor : EditorWindow
 	}
 	void Awake()
 	{
+		m_strCurrentScene = EditorApplication.currentScene;
+
 		vCreateChunkGenerator();
 
 		vRefreshTilesetList();
@@ -90,6 +96,41 @@ public class CMapEditor : EditorWindow
 	{
 		vRefreshTilesetList();
 		vRefreshLayerList();
+
+		if (EditorApplication.isCompiling)
+		{
+			m_fCompiling = true;
+		}
+
+		if (EditorApplication.isPlaying)
+		{
+			m_fIsPlaying = true;
+		}
+
+		if (!EditorApplication.isCompiling && m_fCompiling)
+		{
+			Debug.Log("Finished Recompiling");
+			m_fCompiling = false;
+			vCreateChunkGenerator();
+			m_goGenerator.GetComponent<CChunkGenerator>().vSetTileset(m_aStrTilesets[m_nSelectedTileset]);
+		}
+
+		if (!EditorApplication.isPlaying && !EditorApplication.isPaused && m_fIsPlaying)
+		{
+			Debug.Log("Finished playing");
+			Repaint();
+			m_fIsPlaying = false;
+			vCreateChunkGenerator();
+			m_goGenerator.GetComponent<CChunkGenerator>().vSetTileset(m_aStrTilesets[m_nSelectedTileset]);
+		}
+
+		if (UnityEditor.EditorApplication.currentScene != m_strCurrentScene)
+		{
+			Debug.Log("Switched Scenes");
+			m_strCurrentScene = EditorApplication.currentScene;
+			vCreateChunkGenerator();
+			m_goGenerator.GetComponent<CChunkGenerator>().vSetTileset(m_aStrTilesets[m_nSelectedTileset]);
+		}
 	}
 	void OnGUI()
 	{
@@ -148,7 +189,6 @@ public class CMapEditor : EditorWindow
 
 		if (m_nLayerMask != t_nPrevMask)
 		{
-			
 			for (int t_i = 0; t_i < m_aStrLayers.Length; ++t_i)
 			{
 				CChunkGenerator.Instance.vSetLayerActive(t_i, ((1 << t_i) & m_nLayerMask) > 0);
@@ -402,6 +442,12 @@ public class CMapEditor : EditorWindow
 	}
 	private void vCreateChunkGenerator()
 	{
+		if (m_goGenerator != null)
+		{
+			DestroyImmediate(m_goGenerator);
+			m_goGenerator = null;
+		}
+
 		m_goGenerator = new GameObject();
 		m_goGenerator.name = "CChunkGenerator";
 

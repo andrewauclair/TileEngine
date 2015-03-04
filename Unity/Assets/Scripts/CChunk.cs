@@ -16,7 +16,7 @@ public class CChunk : MonoBehaviour
 	[HideInInspector]
 	public int nLayer = 0;
 
-	[HideInInspector]
+	[HideInInspector][SerializeField]
 	public Mesh m_mesh = null;
     #endregion
 

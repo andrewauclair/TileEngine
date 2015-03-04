@@ -31,3 +31,15 @@ End Goal, feature set
 
 	Map Editor with layers, collision, event functionality(switch scenes for builds/towns/rooms)
 	Game that show cases the map editor functionality
+	
+	
+	
+	
+Portfolio Posts
+	Tile Map Mesh Generation
+	Editor Tools
+	Editor Tools Part 2: Map Editor
+	Editor Refactoring and Improvements
+	Implementing and Optimizing Collision
+	
+	Auto Tiles <- The shit man!

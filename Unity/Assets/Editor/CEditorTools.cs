@@ -15,6 +15,11 @@ public class CEditorTools : MonoBehaviour
         PlayerPrefs.DeleteAll();
     }
 
+	[MenuItem(msc_strToolsName + "/Selection.objects test")]
+	private static void vObjectsTest()
+	{
+		Debug.Log("objects selected: " + Selection.objects.Length);
+	}
 	[MenuItem(msc_strToolsName + "/Generate tile sheet json")]
 	private static void vGenerateTilesheetJSON()
 	{
@@ -84,8 +89,6 @@ public class CEditorTools : MonoBehaviour
 				t_File.Close();
 
 				AssetDatabase.Refresh();
-
-				Debug.Log("Saved file to: " + Application.dataPath + "/Resources/Tilesets/" + t_texture.name + ".json");
 			}
 		}
 	}

@@ -33,7 +33,7 @@ public class CFixedCamera : MonoBehaviour
 			Debug.Break();
 		}
 
-		if (m_Camera.isOrthoGraphic == false)
+		if (m_Camera.orthographic == false)
 		{
 			Debug.LogError("This script is for Orthographic Camera's");
 			Debug.Break();

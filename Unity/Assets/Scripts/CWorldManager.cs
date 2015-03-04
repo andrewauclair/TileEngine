@@ -77,7 +77,9 @@ public class CWorldManager : MonoBehaviour
 		m_lstChunks = new List<CChunk>(t_aChunks);
     }
     void Start()
-    {	
+    {
+		GameObject t_camera = GameObject.FindWithTag("MainCamera");
+		t_camera.hideFlags |= HideFlags.NotEditable;
 	}
 	void Update()
     {
@@ -156,6 +158,20 @@ public class CWorldManager : MonoBehaviour
 			}
 		}
     }
+	void OnDrawGizmos()
+	{
+		Gizmos.color = Color.blue;
+
+		Vector3 t_v3TopLeft = new Vector3(-.5f, .5f, 0f);
+		Vector3 t_v3TopRight = new Vector3(.5f, .5f, 0f);
+		Vector3 t_v3BottomLeft = new Vector3(-.5f, -.5f, 0f);
+		Vector3 t_v3BottomRight = new Vector3(.5f, -.5f, 0f);
+
+		Gizmos.DrawLine(t_v3TopLeft, t_v3TopRight);
+		Gizmos.DrawLine(t_v3TopRight, t_v3BottomRight);
+		Gizmos.DrawLine(t_v3BottomRight, t_v3BottomLeft);
+		Gizmos.DrawLine(t_v3BottomLeft, t_v3TopLeft);
+	}
     #endregion
 
     #region Public Methods

@@ -8,10 +8,6 @@ public class CMapEditor : EditorWindow
 {
 	#region Static Data
 	public static CMapEditor Instance = null;
-
-	// Tileset size options, defaults to 32
-	private static int[] ms_aTileSizeValues = { 16, 32, 64 };
-	private static string[] ms_aTileSizeDisplays = { "16", "32", "64" };
 	#endregion
 
 	#region Private Data
@@ -82,6 +78,13 @@ public class CMapEditor : EditorWindow
 			DestroyImmediate(m_goGenerator);
 			m_goGenerator = null;
 		}
+
+		Tools.current = Tool.None;
+		Tools.visibleLayers = -1;
+	}
+	void OnApplicationQuit()
+	{
+		OnDestroy();
 	}
 	void Update()
 	{
@@ -109,19 +112,17 @@ public class CMapEditor : EditorWindow
 			m_goPreview.gameObject.SetActive(t_fEnabled);
 			Selection.objects = new UnityEngine.Object[0];
 			Tools.current = t_fEnabled ? Tool.View : Tool.None;
+			Tools.visibleLayers = t_fEnabled ? 1 : -1;
 		}
 
 		m_fEnabled = t_fEnabled;
 
 		int t_nPrevTileset = m_nSelectedTileset;
-		int t_nPrevTileSize = m_nTileSize;
 		int t_nPrevMask = m_nLayerMask;
 
 		m_nSelectedTileset = EditorGUILayout.Popup("Tileset", m_nSelectedTileset, m_aStrTilesets);
 		m_nLayerMask = EditorGUILayout.MaskField("Display Layers", m_nLayerMask, m_aStrLayers);
 		m_nSelectedLayer = EditorGUILayout.Popup("Edit Layer", m_nSelectedLayer, m_aStrLayers);
-
-		EditorGUILayout.IntField(GUIUtility.hotControl);
 
 		if (m_nSelectedTileset != t_nPrevTileset)
 		{
@@ -176,13 +177,12 @@ public class CMapEditor : EditorWindow
 	public void SceneGUI(SceneView p_sceneView)
 	{
 		p_sceneView.Repaint();
-		Repaint();
-
+		
 		if (!m_fEnabled)
 		{
 			return;
 		}
-		
+
 		Tools.current = Tool.View;
 
 		Event t_Event = Event.current;
@@ -345,6 +345,7 @@ public class CMapEditor : EditorWindow
 				return;
 			}
 			m_nSelectedTile = p_nTile;
+			Debug.Log("selected tile: " + p_nTile);
 			vUpdatePreviewMesh();
 		}
 	}
@@ -376,10 +377,12 @@ public class CMapEditor : EditorWindow
 		{
 			m_goPreview = GameObject.CreatePrimitive(PrimitiveType.Quad);
 			m_goPreview.name = "CMapEditor - m_goPreview";
-			m_goPreview.renderer.material = CChunkGenerator.Instance.AtlasMat;
+			m_goPreview.GetComponent<Renderer>().material = CChunkGenerator.Instance.AtlasMat;
+
+			m_goPreview.AddComponent<CPreviewHighlight>();
 
 			// We don't want the user to select this object, so hide it
-			m_goPreview.hideFlags = HideFlags.HideAndDontSave;
+			m_goPreview.hideFlags = HideFlags.HideInHierarchy | HideFlags.DontSave;
 		}
 
 		Vector2[] t_aUVs = new Vector2[4];
@@ -395,7 +398,7 @@ public class CMapEditor : EditorWindow
 		t_meshFilter.sharedMesh.uv = t_aUVs;
 		t_meshFilter.sharedMesh.RecalculateNormals();
 
-		m_goPreview.renderer.material = CChunkGenerator.Instance.AtlasMat;
+		m_goPreview.GetComponent<Renderer>().material = CChunkGenerator.Instance.AtlasMat;
 	}
 	private void vCreateChunkGenerator()
 	{
@@ -408,6 +411,8 @@ public class CMapEditor : EditorWindow
 	}
 	private void vUpdateTilesetTexture()
 	{
+		vGenerateTilesetTexture();
+
 		int t_nTexWidth = m_tex2dTileset.width;
 		int t_nTexHeight = m_tex2dTileset.height;
 		
@@ -418,6 +423,10 @@ public class CMapEditor : EditorWindow
 		int t_nTileWidth = Mathf.FloorToInt(t_nEditorWidth / m_nTileSize) - 1;
 		int t_nTileHeight = Mathf.CeilToInt(t_nTiles / (float)t_nTileWidth);
 
+		if (t_nTileWidth * m_nTileSize > m_tex2dTileset.width)
+		{
+			return;
+		}
 		Texture2D t_texNew = new Texture2D(t_nTileWidth * m_nTileSize, t_nTileHeight * m_nTileSize);
 
 		int t_xOld = 0;
@@ -455,6 +464,7 @@ public class CMapEditor : EditorWindow
 
 		// set to new texture
 		m_tex2dTileset = t_texNew;
+		m_tex2dTileset.hideFlags = HideFlags.HideAndDontSave;
 	}
 	#endregion
 }
